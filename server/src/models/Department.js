@@ -2,7 +2,7 @@
 import { Model } from 'sequelize';
 export default (sequelize, DataTypes) => {
     class Department extends Model {
-        static associate(models) { }
+
     }
     Department.init(
         {
@@ -19,6 +19,7 @@ export default (sequelize, DataTypes) => {
         {
             sequelize,
             modelName: 'Department',
+            timestamps: false
         }
     );
 

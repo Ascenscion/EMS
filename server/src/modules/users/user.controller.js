@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
-import User from "../../models/User.js";
+import db from "../../models/index.js"
 import { where } from "sequelize";
+const { User } = db;
 
 export async function createUser({ body }) {
     const { password, email } = body;

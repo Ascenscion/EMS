@@ -1,6 +1,8 @@
 # Server with Elysia
 Step 1: 
 [ npm install elysia sequelize tedious dotenv @elysiajs/cors ]
+[npm install @elysiajs/node]
+[npm install @elysiajs/openapi]
 
 | Package       | Purpose                                 |
 | ------------- | --------------------------------------- |

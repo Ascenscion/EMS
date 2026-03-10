@@ -3,6 +3,7 @@
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/node": "^1.4.5",
+    "@elysiajs/openapi": "^1.4.14",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",

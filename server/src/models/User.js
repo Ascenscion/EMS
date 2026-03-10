@@ -40,7 +40,7 @@ export default (sequelize, DataTypes) => {
 
             department_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false,
+                allowNull: true,
                 references: {
                     model: "Departments",
                     key: "department_id"
@@ -48,7 +48,7 @@ export default (sequelize, DataTypes) => {
             },
             role_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false,
+                allowNull: true,
                 references: {
                     model: "Roles",
                     key: "role_id"
