@@ -39,8 +39,7 @@ export async function getAllUsers() {
 }
 
 export async function getUser({ params }) {
-
-    const user = await User.findByPk(params.id, {
+    const user = await User.findByPk(params.user_id, {
         attributes: { exclude: ["password_hash"] }
     });
     if (!user) {
@@ -50,7 +49,7 @@ export async function getUser({ params }) {
 }
 
 export async function updateUser({ params, body }) {
-    const user = await User.findByPk(params.id);
+    const user = await User.findByPk(params.user_id);
 
     if (!user) {
         return { error: "User not found" }
@@ -64,7 +63,7 @@ export async function updateUser({ params, body }) {
 }
 
 export async function deleteUser({ params }) {
-    const user = User.findByPk(params.id);
+    const user = User.findByPk(params.user_id);
 
     if (!user) {
         return { error: "User not found" }

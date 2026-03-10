@@ -5,7 +5,7 @@ export default (sequelize, DataTypes) => {
     }
     User.init(
         {
-            id: {
+            user_id: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true,
@@ -43,7 +43,7 @@ export default (sequelize, DataTypes) => {
                 allowNull: false,
                 references: {
                     model: "Departments",
-                    key: "id"
+                    key: "department_id"
                 }
             },
             role_id: {
@@ -51,7 +51,7 @@ export default (sequelize, DataTypes) => {
                 allowNull: false,
                 references: {
                     model: "Roles",
-                    key: "id"
+                    key: "role_id"
                 }
             }
         },
