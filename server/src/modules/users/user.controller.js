@@ -40,9 +40,11 @@ export async function getAllUsers() {
 }
 
 export async function getUser({ params }) {
-    const user = await User.findByPk(params.user_id, {
+    const user = await User.findByPk(params.id, {
         attributes: { exclude: ["password_hash"] }
     });
+    console.log("USER", user);
+    console.log("PARAMS", params.id);
     if (!user) {
         return { error: "User not found." }
     }
