@@ -2,11 +2,10 @@
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class User extends Model {
-        static associate(models) { }
     }
     User.init(
         {
-            userId: {
+            id: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true,
@@ -22,26 +21,38 @@ module.exports = (sequelize, DataTypes) => {
             email: {
                 type: DataTypes.STRING,
                 unique: true,
-                allowNull: false
+                allowNull: false,
+                validate: {
+                    isEmail: true
+                }
             },
-
             phone: {
                 type: DataTypes.STRING,
-                allowNull: false
+                allowNull: false,
+                validate: {
+                    len: [10, 15]
+                }
             },
-
             password_hash: {
-                type: DataTypes.STRING,
+                type: DataTypes.STRING(255),
                 allowNull: false,
             },
 
             department_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false
+                allowNull: false,
+                references: {
+                    model: "Departments",
+                    key: "id"
+                }
             },
             role_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false
+                allowNull: false,
+                references: {
+                    model: "Roles",
+                    key: id
+                }
             }
         },
         {
