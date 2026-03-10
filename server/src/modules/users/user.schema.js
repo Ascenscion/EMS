@@ -73,10 +73,10 @@ export const userIdParam = t.Object({
 //     })
 // })
 
-export const changePasswordSchema = t.Object({
-    password: t.String({
-        pattern: "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{8,}$",
-        minLength: 8,
-        maxLength: 20
-    })
-})
+// export const changePasswordSchema = t.Object({
+//     password: t.String({
+//         pattern: "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{8,}$",
+//         minLength: 8,
+//         maxLength: 20
+//     })
+// })

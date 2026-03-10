@@ -1,5 +1,6 @@
 require("dotenv").config()
-
+import { Elysia } from "elysia";
+import { userRoutes } from "./src/modules/users/user.routes";
 const { Elysia } = require("elysia");
 const { cors } = require("@elysiajs/cors");
 const { node } = require("@elysiajs/node");
@@ -7,6 +8,8 @@ const sequelize = require("./src/config/database")
 const db = require("./src/models")
 db.sequelize = sequelize;
 
+export const app = new Elysia()
+    .use(userRoutes);
 
 const server = new Elysia({
     adapter: node()

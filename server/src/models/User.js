@@ -51,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
                 references: {
                     model: "Roles",
-                    key: id
+                    key: "id"
                 }
             }
         },
