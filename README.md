@@ -27,3 +27,13 @@ Step 4. Connect DB
 a. Set environmental variables in .env
 b. src/config/database.js Create DB connection
 c. app.js run server "node app.js"
+
+Step 5: Create models
+
+Step 6: Create Schemas
+
+Step 7: Create Controllers
+
+Step 8: Create Routes
+
+Step 9: Register routes in app.js
