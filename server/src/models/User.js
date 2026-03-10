@@ -1,12 +1,11 @@
 'use strict';
-const { Model } = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
+import { Model } from 'sequelize';
+export default (sequelize, DataTypes) => {
     class User extends Model {
-        static associate(models) { }
     }
     User.init(
         {
-            userId: {
+            user_id: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true,
@@ -22,26 +21,38 @@ module.exports = (sequelize, DataTypes) => {
             email: {
                 type: DataTypes.STRING,
                 unique: true,
-                allowNull: false
+                allowNull: false,
+                validate: {
+                    isEmail: true
+                }
             },
-
             phone: {
                 type: DataTypes.STRING,
-                allowNull: false
+                allowNull: false,
+                validate: {
+                    len: [10, 15]
+                }
             },
-
             password_hash: {
-                type: DataTypes.STRING,
+                type: DataTypes.STRING(255),
                 allowNull: false,
             },
 
             department_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false
+                allowNull: true,
+                references: {
+                    model: "Departments",
+                    key: "department_id"
+                }
             },
             role_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false
+                allowNull: true,
+                references: {
+                    model: "Roles",
+                    key: "role_id"
+                }
             }
         },
         {

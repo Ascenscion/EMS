@@ -1,6 +1,6 @@
 'use strict';
-const { Model } = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
+import { Model } from 'sequelize';
+export default (sequelize, DataTypes) => {
     class Application extends Model {
         static associate(models) { }
     }
@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Application.associate = (models) => {
         Application.belongsTo(models.User, {
-            foreignKey: "user_id"
+            foreignKey: "id"
         })
 
         Application.belongsTo(models.Event, {

@@ -1,8 +1,8 @@
 'use strict';
-const { Model } = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
+import { Model } from 'sequelize';
+export default (sequelize, DataTypes) => {
     class Department extends Model {
-        static associate(models) { }
+
     }
     Department.init(
         {
@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
         {
             sequelize,
             modelName: 'Department',
+            timestamps: false
         }
     );
 
