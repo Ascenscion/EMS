@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/node": "^1.4.5",

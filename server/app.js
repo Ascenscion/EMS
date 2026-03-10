@@ -1,11 +1,12 @@
-require("dotenv").config()
+import dotenv from "dotenv";
+dotenv.config();
+import { userRoutes } from "./src/modules/users/user.routes.js";
 import { Elysia } from "elysia";
-import { userRoutes } from "./src/modules/users/user.routes";
-const { Elysia } = require("elysia");
-const { cors } = require("@elysiajs/cors");
-const { node } = require("@elysiajs/node");
-const sequelize = require("./src/config/database")
-const db = require("./src/models")
+import { cors } from "@elysiajs/cors";
+import { node } from "@elysiajs/node";
+import sequelize from "./src/config/database.js"
+import db from "./src/models/index.js"
+
 db.sequelize = sequelize;
 
 export const app = new Elysia()

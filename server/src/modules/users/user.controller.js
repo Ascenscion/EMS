@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import User from "../../models/User";
+import User from "../../models/User.js";
 import { where } from "sequelize";
 
 export async function createUser({ body }) {

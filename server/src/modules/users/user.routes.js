@@ -1,10 +1,10 @@
 import { Elysia } from "elysia";
-import * as controller from "./user.controller";
+import * as controller from "./user.controller.js";
 import {
     createUserSchema,
     updateUserSchema,
     userIdParam
-} from "./user.schema";
+} from "./user.schema.js";
 
 export const userRoutes = new Elysia({
     prefix: "/users"
@@ -20,7 +20,7 @@ export const userRoutes = new Elysia({
         body: createUserSchema
     })
 
-    .update("/:id", controller.updateUser, {
+    .put("/:id", controller.updateUser, {
         params: userIdParam,
         body: updateUserSchema
     })
