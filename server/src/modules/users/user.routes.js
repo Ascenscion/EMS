@@ -20,7 +20,7 @@ export const userRoutes = new Elysia({
         body: createUserSchema
     })
 
-    .put("/:id", controller.updateUser, {
+    .patch("/:id", controller.updateUser, {
         params: userIdParam,
         body: updateUserSchema
     })

@@ -52,8 +52,8 @@ export const updateUserSchema = t.Object({
         minLength: 8,
         maxLength: 20
     })),
-    department_id: t.Optional(t.Integer()),
-    role_id: t.Optional(t.Integer())
+    department_id: t.Optional(t.Integer({ minimum: 1 })),
+    role_id: t.Optional(t.Integer({ minimum: 1 }))
 });
 
 export const userIdParam = t.Object({

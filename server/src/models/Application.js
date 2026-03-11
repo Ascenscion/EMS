@@ -27,7 +27,7 @@ export default (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            user_id: DataTypes.INTEGER,
+            id: DataTypes.INTEGER,
             event_id: DataTypes.INTEGER
         },
         {

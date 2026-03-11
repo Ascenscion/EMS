@@ -5,7 +5,7 @@ export default (sequelize, DataTypes) => {
     }
     User.init(
         {
-            user_id: {
+            id: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true,
@@ -70,11 +70,11 @@ export default (sequelize, DataTypes) => {
         })
 
         User.hasMany(models.Application, {
-            foreignKey: "user_id"
+            foreignKey: "id"
         })
 
         User.hasMany(models.Assignment, {
-            foreignKey: "user_id"
+            foreignKey: "id"
         });
     };
     return User;

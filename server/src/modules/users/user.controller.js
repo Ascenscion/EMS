@@ -52,26 +52,39 @@ export async function getUser({ params }) {
 }
 
 export async function updateUser({ params, body }) {
-    const user = await User.findByPk(params.user_id);
-
+    const user = await User.findByPk(params.id);
     if (!user) {
-        return { error: "User not found" }
+        return { error: "User not found" };
+    }
+    Object.keys(body).forEach(key => {
+        if (body[key] === "") delete body[key];
+    });
+
+    if (body.password) {
+        body.password_hash = await bcrypt.hash(body.password, 10)
+        delete body.password;
     }
 
     await user.update(body);
     const updatedUser = user.toJSON();
     delete updatedUser.password_hash;
-
     return updatedUser;
 }
 
 export async function deleteUser({ params }) {
-    const user = User.findByPk(params.user_id);
-
-    if (!user) {
-        return { error: "User not found" }
+    const deleted = await User.destroy({
+        where: { id: params.id }
+    });
+    if (!deleted) {
+        return { error: "User not found." }
     }
+    return { message: "User deleted" }
+    // const user = await User.findByPk(params.id);
 
-    await user.destroy();
-    return { message: "User deleted." }
+    // if (!user) {
+    //     return { error: "User not found" }
+    // }
+    // console.log(user);
+    // await user.destroy();
+    // return { message: "User deleted." }
 }
