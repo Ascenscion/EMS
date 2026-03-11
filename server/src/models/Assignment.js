@@ -6,7 +6,7 @@ export default (sequelize, DataTypes) => {
     }
     Assignment.init(
         {
-            assignment_id: {
+            id: {
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
                 primaryKey: true,
@@ -24,8 +24,22 @@ export default (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            shift_id: DataTypes.INTEGER,
-            user_id: DataTypes.INTEGER
+            shift_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "Shifts",
+                    key: "id"
+                }
+            },
+            user_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "Users",
+                    key: "id"
+                }
+            }
         },
         {
             sequelize,
@@ -35,15 +49,15 @@ export default (sequelize, DataTypes) => {
 
     Assignment.associate = (models) => {
         Assignment.belongsTo(models.User, {
-            foreignKey: "user_id"
+            foreignKey: "id"
         })
 
         Assignment.belongsTo(models.Shift, {
-            foreignKey: "shift_id"
+            foreignKey: "id"
         })
 
         Assignment.hasOne(models.CheckIn, {
-            foreignKey: "assignment_id"
+            foreignKey: "id"
         })
     }
     return Assignment;

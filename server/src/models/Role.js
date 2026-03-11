@@ -6,7 +6,7 @@ export default (sequelize, DataTypes) => {
     }
     Role.init(
         {
-            role_id: {
+            id: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true,
@@ -23,7 +23,7 @@ export default (sequelize, DataTypes) => {
     );
     Role.associate = (models) => {
         Role.hasMany(models.User, {
-            foreignKey: "role_id"
+            foreignKey: "id"
         });
     };
     return Role;

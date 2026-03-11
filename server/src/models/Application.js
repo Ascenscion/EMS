@@ -6,7 +6,7 @@ export default (sequelize, DataTypes) => {
     }
     Application.init(
         {
-            application_id: {
+            id: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true,
@@ -27,8 +27,22 @@ export default (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            id: DataTypes.INTEGER,
-            event_id: DataTypes.INTEGER
+            user_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "Users",
+                    key: "id"
+                }
+            },
+            event_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "Events",
+                    key: "id"
+                }
+            }
         },
         {
             sequelize,
@@ -42,7 +56,7 @@ export default (sequelize, DataTypes) => {
         })
 
         Application.belongsTo(models.Event, {
-            foreignKey: "event_id"
+            foreignKey: "id"
         })
     }
     return Application;

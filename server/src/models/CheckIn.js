@@ -6,7 +6,7 @@ export default (sequelize, DataTypes) => {
     }
     CheckIn.init(
         {
-            check_in_id: {
+            id: {
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
                 allowNull: false,
@@ -24,7 +24,14 @@ export default (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            assignment_id: DataTypes.INTEGER
+            assignment_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "Assignments",
+                    key: "id"
+                }
+            }
         },
         {
             sequelize,
@@ -34,7 +41,7 @@ export default (sequelize, DataTypes) => {
 
     CheckIn.associate = (models) => {
         CheckIn.belongsTo(models.Assignment, {
-            foreignKey: "assignment_id"
+            foreignKey: "id"
         })
     }
     return CheckIn;

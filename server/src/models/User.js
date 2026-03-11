@@ -43,7 +43,7 @@ export default (sequelize, DataTypes) => {
                 allowNull: true,
                 references: {
                     model: "Departments",
-                    key: "department_id"
+                    key: "id"
                 }
             },
             role_id: {
@@ -51,7 +51,7 @@ export default (sequelize, DataTypes) => {
                 allowNull: true,
                 references: {
                     model: "Roles",
-                    key: "role_id"
+                    key: "id"
                 }
             }
         },
@@ -62,11 +62,11 @@ export default (sequelize, DataTypes) => {
     );
     User.associate = (models) => {
         User.belongsTo(models.Department, {
-            foreignKey: "department_id"
+            foreignKey: "id"
         });
 
         User.belongsTo(models.Role, {
-            foreignKey: "role_id"
+            foreignKey: "id"
         })
 
         User.hasMany(models.Application, {

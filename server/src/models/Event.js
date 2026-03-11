@@ -6,7 +6,7 @@ export default (sequelize, DataTypes) => {
     }
     Event.init(
         {
-            event_id: {
+            id: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true,
@@ -31,7 +31,14 @@ export default (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            location_id: DataTypes.INTEGER
+            location_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "Locations",
+                    key: "id"
+                }
+            }
 
         },
         {
@@ -41,13 +48,13 @@ export default (sequelize, DataTypes) => {
     );
     Event.associate = (models) => {
         Event.belongsTo(models.Location, {
-            foreignKey: "location_id"
+            foreignKey: "id"
         })
         Event.hasMany(models.Application, {
-            foreignKey: "event_id"
+            foreignKey: "id"
         })
         Event.hasMany(models.Shift, {
-            foreignKey: "event_id"
+            foreignKey: "id"
         })
     }
     return Event;
