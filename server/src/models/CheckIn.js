@@ -41,7 +41,9 @@ export default (sequelize, DataTypes) => {
 
     CheckIn.associate = (models) => {
         CheckIn.belongsTo(models.Assignment, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
     }
     return CheckIn;

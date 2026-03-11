@@ -28,7 +28,7 @@ export default (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 allowNull: false
             },
-            events_id: {
+            event_id: {
                 type: DataTypes.INTEGER,
                 allowNull: true,
                 references: {
@@ -44,11 +44,15 @@ export default (sequelize, DataTypes) => {
     );
     Shift.associate = (models) => {
         Shift.hasMany(models.Assignment, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
 
         Shift.belongsTo(models.Event, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
     }
     return Shift;

@@ -48,13 +48,19 @@ export default (sequelize, DataTypes) => {
     );
     Event.associate = (models) => {
         Event.belongsTo(models.Location, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
         Event.hasMany(models.Application, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
         Event.hasMany(models.Shift, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
     }
     return Event;

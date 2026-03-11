@@ -40,7 +40,9 @@ export default (sequelize, DataTypes) => {
     );
     Location.associate = (models) => {
         Location.hasMany(models.Event, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
     }
     return Location;

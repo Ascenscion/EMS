@@ -23,7 +23,9 @@ export default (sequelize, DataTypes) => {
     );
     Role.associate = (models) => {
         Role.hasMany(models.User, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         });
     };
     return Role;

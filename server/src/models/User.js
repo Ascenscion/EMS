@@ -62,19 +62,27 @@ export default (sequelize, DataTypes) => {
     );
     User.associate = (models) => {
         User.belongsTo(models.Department, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         });
 
         User.belongsTo(models.Role, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
 
         User.hasMany(models.Application, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
 
         User.hasMany(models.Assignment, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         });
     };
     return User;

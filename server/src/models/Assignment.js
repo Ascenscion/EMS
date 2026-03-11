@@ -49,15 +49,21 @@ export default (sequelize, DataTypes) => {
 
     Assignment.associate = (models) => {
         Assignment.belongsTo(models.User, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
 
         Assignment.belongsTo(models.Shift, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
 
         Assignment.hasOne(models.CheckIn, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
     }
     return Assignment;

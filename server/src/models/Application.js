@@ -52,11 +52,15 @@ export default (sequelize, DataTypes) => {
 
     Application.associate = (models) => {
         Application.belongsTo(models.User, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
 
         Application.belongsTo(models.Event, {
-            foreignKey: "id"
+            foreignKey: "id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
     }
     return Application;
