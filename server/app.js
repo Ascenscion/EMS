@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { userRoutes } from "./src/modules/users/user.routes.js";
+import { eventRoutes } from "./src/modules/events/event.routes.js";
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { node } from "@elysiajs/node";
@@ -15,7 +16,7 @@ export const app = new Elysia({
     adapter: node()
 })
     .use(userRoutes)
-
+    .use(eventRoutes)
     .use(cors())
     .use(openapi())
     .use(userRoutes)

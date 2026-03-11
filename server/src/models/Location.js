@@ -8,7 +8,6 @@ export default (sequelize, DataTypes) => {
         {
             id: {
                 type: DataTypes.INTEGER,
-                allowNull: false,
                 primaryKey: true,
                 autoIncrement: true
             },
@@ -40,7 +39,7 @@ export default (sequelize, DataTypes) => {
     );
     Location.associate = (models) => {
         Location.hasMany(models.Event, {
-            foreignKey: "id",
+            foreignKey: "location_id",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
         })
