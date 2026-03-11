@@ -28,33 +28,7 @@ export const createUserSchema = t.Object({
     role_id: t.Integer(),
 });
 
-export const updateUserSchema = t.Object({
-    first_name: t.Optional(t.String({
-        pattern: "^[A-Za-z]+$",
-        minLength: 2,
-        maxLength: 50
-    })),
-    last_name: t.Optional(t.String({
-        pattern: "^[A-Za-z]+$",
-        minLength: 2,
-        maxLength: 50
-    })),
-    email: t.Optional(t.String({
-        format: "email"
-    })),
-    phone: t.Optional(t.String({
-        pattern: "^[0-9]+$",
-        minLength: 10,
-        maxLength: 15
-    })),
-    password: t.Optional(t.String({
-        pattern: "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{8,}$",
-        minLength: 8,
-        maxLength: 20
-    })),
-    department_id: t.Optional(t.Integer({ minimum: 1 })),
-    role_id: t.Optional(t.Integer({ minimum: 1 }))
-});
+export const updateUserSchema = t.Partial(createUserSchema);
 
 export const userIdParam = t.Object({
     id: t.Number()
