@@ -44,13 +44,13 @@ export default (sequelize, DataTypes) => {
     );
     Shift.associate = (models) => {
         Shift.hasMany(models.Assignment, {
-            foreignKey: "id",
+            foreignKey: "shift_id",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
         })
 
         Shift.belongsTo(models.Event, {
-            foreignKey: "id",
+            foreignKey: "event_id",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
         })

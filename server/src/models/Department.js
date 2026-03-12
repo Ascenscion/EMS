@@ -25,7 +25,7 @@ export default (sequelize, DataTypes) => {
 
     Department.associate = (models) => {
         Department.hasMany(models.User, {
-            foreignKey: "id",
+            foreignKey: "department_id",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
         });

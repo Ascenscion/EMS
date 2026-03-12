@@ -14,7 +14,7 @@ export const createEventSchema = t.Object({
         date: t.RegExp(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/),
         description: "End date"
     }),
-    status: t.Enum(["draft", "active", "completed"]),
+    status: t.String(),
     created_by: t.Integer({
         minimum: 1
     }),
