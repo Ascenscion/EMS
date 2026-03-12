@@ -4,13 +4,9 @@ const { Application } = db;
 
 export async function createApplication({ body }) {
     const { status, applied_at, reviewed_by, reviewed_at, user_id, event_id } = body;
+    console.log("STATUS", status);
 
-    applied_at = new Date();
-    reviewed_at = new Date();
 
-    if (status !== "pending" || status !== "approved" || status !== "rejected") {
-        return { error: "Status invalid" }
-    }
 
     const application = await Application.create({
         status,

@@ -1,4 +1,4 @@
-import { t } from "elysia";
+import { status, t } from "elysia";
 
 export const createApplicationSchema = t.Object({
     status: t.Union([
@@ -8,7 +8,7 @@ export const createApplicationSchema = t.Object({
     ]),
     applied_at: t.String({
         date: t.RegExp(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/),
-        description: "Applied at date/time"
+        description: "Applied at date/time",
     }),
     reviewed_by_user_id: t.Integer({
         minimum: 1
