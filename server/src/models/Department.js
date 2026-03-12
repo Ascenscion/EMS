@@ -6,7 +6,7 @@ export default (sequelize, DataTypes) => {
     }
     Department.init(
         {
-            department_id: {
+            id: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true,
@@ -25,7 +25,9 @@ export default (sequelize, DataTypes) => {
 
     Department.associate = (models) => {
         Department.hasMany(models.User, {
-            foreignKey: "department_id"
+            foreignKey: "department_id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         });
     };
     return Department;

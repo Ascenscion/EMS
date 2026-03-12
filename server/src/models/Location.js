@@ -6,9 +6,8 @@ export default (sequelize, DataTypes) => {
     }
     Location.init(
         {
-            location_id: {
+            id: {
                 type: DataTypes.INTEGER,
-                allowNull: false,
                 primaryKey: true,
                 autoIncrement: true
             },
@@ -40,7 +39,9 @@ export default (sequelize, DataTypes) => {
     );
     Location.associate = (models) => {
         Location.hasMany(models.Event, {
-            foreignKey: "location_id"
+            foreignKey: "location_id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
     }
     return Location;

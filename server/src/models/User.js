@@ -5,7 +5,7 @@ export default (sequelize, DataTypes) => {
     }
     User.init(
         {
-            user_id: {
+            id: {
                 type: DataTypes.INTEGER,
                 primaryKey: true,
                 autoIncrement: true,
@@ -43,7 +43,7 @@ export default (sequelize, DataTypes) => {
                 allowNull: true,
                 references: {
                     model: "Departments",
-                    key: "department_id"
+                    key: "id"
                 }
             },
             role_id: {
@@ -51,7 +51,7 @@ export default (sequelize, DataTypes) => {
                 allowNull: true,
                 references: {
                     model: "Roles",
-                    key: "role_id"
+                    key: "id"
                 }
             }
         },
@@ -62,20 +62,34 @@ export default (sequelize, DataTypes) => {
     );
     User.associate = (models) => {
         User.belongsTo(models.Department, {
-            foreignKey: "department_id"
+            foreignKey: "department_id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         });
 
         User.belongsTo(models.Role, {
-            foreignKey: "role_id"
+            foreignKey: "role_id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
 
         User.hasMany(models.Application, {
-            foreignKey: "user_id"
+            foreignKey: "user_id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
 
         User.hasMany(models.Assignment, {
-            foreignKey: "user_id"
-        });
+            foreignKey: "user_id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
+        })
+
+        User.hasMany(models.Application, {
+            foreignKey: "reviewed_by_user_id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
+        })
     };
     return User;
 };
