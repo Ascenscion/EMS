@@ -1,6 +1,7 @@
 import { status, t } from "elysia";
 
 export const createApplicationSchema = t.Object({
+
     status: t.Union([
         t.Literal("pending"),
         t.Literal("approved"),
