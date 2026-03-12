@@ -60,7 +60,7 @@ export default (sequelize, DataTypes) => {
             onUpdate: "NO ACTION"
         })
 
-        Assignment.hasOne(models.CheckIn, {
+        Assignment.hasMany(models.CheckIn, {
             foreignKey: "assignment_id",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
