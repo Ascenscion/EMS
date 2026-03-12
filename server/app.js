@@ -11,6 +11,7 @@ import db from "./src/models/index.js"
 import { seedDatabase } from "./src/config/seed.js";
 import { applicationRoutes } from "./src/modules/applications/application.routes.js";
 import { assignmentRoutes } from "./src/modules/assignments/assignment.routes.js";
+import { locationRoutes } from "./src/modules/locations/location.routes.js";
 
 db.sequelize = sequelize;
 
@@ -21,6 +22,7 @@ export const app = new Elysia({
     .use(eventRoutes)
     .use(applicationRoutes)
     .use(assignmentRoutes)
+    .use(locationRoutes)
     .use(cors())
     .use(openapi())
     .use(userRoutes)
