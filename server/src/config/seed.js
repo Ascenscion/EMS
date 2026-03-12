@@ -147,7 +147,7 @@ export async function seedDatabase(db) {
         {
             status: "pending",
             applied_at: "03/01/2026",
-            reviewed_by: "Admin",
+            reviewed_by_user_id: 1,
             reviewed_at: "03/02/2026",
             user_id: 1,
             event_id: 1
@@ -155,7 +155,7 @@ export async function seedDatabase(db) {
         {
             status: "approved",
             applied_at: "03/01/2026",
-            reviewed_by: "Admin",
+            reviewed_by_user_id: 2,
             reviewed_at: "03/03/2026",
             user_id: 2,
             event_id: 1
@@ -163,7 +163,7 @@ export async function seedDatabase(db) {
         {
             status: "rejected",
             applied_at: "03/02/2026",
-            reviewed_by: "Manager",
+            reviewed_by_user_id: 3,
             reviewed_at: "03/04/2026",
             user_id: 3,
             event_id: 2
@@ -171,7 +171,7 @@ export async function seedDatabase(db) {
         {
             status: "approved",
             applied_at: "03/03/2026",
-            reviewed_by: "Manager",
+            reviewed_by_user_id: 2,
             reviewed_at: "03/05/2026",
             user_id: 4,
             event_id: 2
@@ -179,7 +179,7 @@ export async function seedDatabase(db) {
         {
             status: "pending",
             applied_at: "03/04/2026",
-            reviewed_by: "Admin",
+            reviewed_by_user_id: 1,
             reviewed_at: "03/06/2026",
             user_id: 5,
             event_id: 3

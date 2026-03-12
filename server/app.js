@@ -9,6 +9,7 @@ import { openapi } from "@elysiajs/openapi";
 import sequelize from "./src/config/database.js"
 import db from "./src/models/index.js"
 import { seedDatabase } from "./src/config/seed.js";
+import { applicationRoutes } from "./src/modules/applications/application.routes.js";
 
 db.sequelize = sequelize;
 
@@ -17,6 +18,7 @@ export const app = new Elysia({
 })
     .use(userRoutes)
     .use(eventRoutes)
+    .use(applicationRoutes)
     .use(cors())
     .use(openapi())
     .use(userRoutes)

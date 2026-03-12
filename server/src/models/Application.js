@@ -13,19 +13,24 @@ export default (sequelize, DataTypes) => {
             },
             status: {
                 type: DataTypes.STRING,
-                allowNull: false
+                allowNull: false,
+                defaultValue: "pending"
             },
             applied_at: {
                 type: DataTypes.STRING,
-                allowNull: false,
+                allowNull: true,
             },
-            reviewed_by: {
-                type: DataTypes.STRING,
-                allowNull: false
+            reviewed_by_user_id: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                references: {
+                    model: "Users",
+                    key: "id"
+                }
             },
             reviewed_at: {
                 type: DataTypes.STRING,
-                allowNull: false
+                allowNull: true
             },
             user_id: {
                 type: DataTypes.INTEGER,
@@ -61,6 +66,11 @@ export default (sequelize, DataTypes) => {
             foreignKey: "event_id",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
+        })
+
+        Application.belongsTo(models.User, {
+            foreignKey: "reviewed_by_user_id",
+            as: "reviewer"
         })
     }
     return Application;

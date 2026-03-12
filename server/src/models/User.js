@@ -83,7 +83,13 @@ export default (sequelize, DataTypes) => {
             foreignKey: "user_id",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
-        });
+        })
+
+        User.hasMany(models.Application, {
+            foreignKey: "reviewed_by_user_id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
+        })
     };
     return User;
 };
