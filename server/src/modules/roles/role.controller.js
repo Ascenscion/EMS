@@ -33,4 +33,5 @@ export async function deleteRole({ params }) {
     const deleted = await Role.destroy({
         where: { id: params.id }
     })
+    return deleted;
 }

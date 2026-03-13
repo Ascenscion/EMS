@@ -7,7 +7,7 @@ import {
 import { Elysia } from "elysia";
 
 export const roleRoutes = new Elysia({
-    prefix: "/routes"
+    prefix: "/roles"
 })
     .get("/", controller.getAllRoles)
     .get("/:id", controller.getRole, {
@@ -20,6 +20,6 @@ export const roleRoutes = new Elysia({
         params: roleParamId,
         body: updateRoleSchema
     })
-    .delete("/id", controller.deleteRole, {
+    .delete("/:id", controller.deleteRole, {
         params: roleParamId
     })
