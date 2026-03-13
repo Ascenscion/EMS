@@ -12,17 +12,9 @@ export default (sequelize, DataTypes) => {
                 primaryKey: true,
                 allowNull: false,
             },
-            assigned_by: {
-                type: DataTypes.STRING,
-                allowNull: false
-            },
-            assigned_at: {
-                type: DataTypes.STRING,
-                allowNull: false
-            },
             status: {
                 type: DataTypes.STRING,
-                allowNull: false
+                allowNull: true
             },
             shift_id: {
                 type: DataTypes.INTEGER,
@@ -44,6 +36,9 @@ export default (sequelize, DataTypes) => {
         {
             sequelize,
             modelName: 'Assignment',
+            createdAt: "assigned_at",
+            updatedAt: "updated_at",
+
         }
     );
 
