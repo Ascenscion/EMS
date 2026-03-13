@@ -15,6 +15,7 @@ import { locationRoutes } from "./src/modules/locations/location.routes.js";
 import { shiftRoutes } from "./src/modules/shifts/shift.routes.js";
 import { roleRoutes } from "./src/modules/roles/role.routes.js";
 import { checkInRoutes } from "./src/modules/checkIn/checkIn.routes.js";
+import { departmentRoutes } from "./src/modules/departments/department.routes.js";
 
 db.sequelize = sequelize;
 
@@ -29,6 +30,7 @@ export const app = new Elysia({
     .use(shiftRoutes)
     .use(roleRoutes)
     .use(checkInRoutes)
+    .use(departmentRoutes)
     .use(cors())
     .use(openapi())
     .use(userRoutes)
