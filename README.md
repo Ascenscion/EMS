@@ -39,3 +39,37 @@ Step 7: Create Controllers
 Step 8: Create Routes
 
 Step 9: Register routes in app.js
+
+# Client with React
+## Step 1: Create project and install dependencies.
+a. [npm create vite@latest .] DONT forget period.       *create project*
+b. [npm install -D tailwindcss@3 postcss autoprefixer   *install tw*
+>> npx tailwindcss init -p]                             
+c. npm install react-router-dom                         *create routes
+d. npm install axios                                    *api calls
+e. npm install react-hot-toast                          *error messages
+f. npm install @tanstack/react-table                    *tables
+g. npm install lucide-react                             *icons
+h. npm install headlessui/react                         *components (like shadcn)
+
+In index.css Paste: 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+## Step 2: Create project structure
+src
+ |-- api
+ |-- components
+ |-- layouts
+ |-- pages
+ |-- routes
+ |-- hooks
+ |-- services
+ |-- utils
+
+## Step 3: Layouts
+Create main layout
+
+## Step 4: Set up Routing
+

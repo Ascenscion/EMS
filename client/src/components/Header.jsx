@@ -11,12 +11,12 @@ const Header = () => {
 
                     {/* Logo circle */}
                     <div className="w-9 h-9 rounded-lg bg-black flex items-center justify-center">
-                        <span className="text-white font-semibold text-sm">IEM</span>
+                        <span className="text-white font-semibold text-sm">EMS</span>
                     </div>
 
                     {/* Title */}
                     <h1 className="text-lg font-semibold tracking-wide text-zinc-800">
-                        Iconic Entertainment Management Inc.
+                        Employee Management System
                     </h1>
 
                 </div>
