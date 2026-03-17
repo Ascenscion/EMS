@@ -23,9 +23,10 @@ const ReTable = ({ columns, data }) => {
                     {data.map((row, index) => (
                         <tr key={index} className="hover:bg-zinc-50 transition">
 
-                            {columns.map((col) => (
-                                <td key={col.accessor} className="px-6 py-4">
-                                    {row[col.accessor]}
+                            {columns.map((col, index) => (
+                                <td key={col.accessor || index} className="px-6 py-4">
+                                    {col.render ? col.render(row) : row[col.accessor]}
+                                    {/* {row[col.accessor]} */}
                                 </td>
                             ))}
 

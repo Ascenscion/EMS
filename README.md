@@ -51,6 +51,7 @@ e. npm install react-hot-toast                          *error messages
 f. npm install @tanstack/react-table                    *tables
 g. npm install lucide-react                             *icons
 h. npm install headlessui/react                         *components (like shadcn)
+I. npm instal react-hook-form                           *forms
 
 In index.css Paste: 
 @tailwind base;
@@ -71,5 +72,7 @@ src
 ## Step 3: Layouts
 Create main layout
 
-## Step 4: Set up Routing
+## Step 4: Set up Routing and create pages.
+
+
 
