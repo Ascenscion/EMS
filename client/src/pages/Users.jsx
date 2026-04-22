@@ -5,52 +5,10 @@ import AddButton from '../components/AddButton.jsx';
 import AddUserModal from '../components/AddUserModal.jsx';
 
 const Users = () => {
-    const [open, setOpen] = useState(false)
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
+    const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedUser, setSelectedUser] = useState(null);
-
-    const handleEdit = async (user) => {
-        setSelectedUser(user);
-        setOpen(true);
-    }
-
-    const handleDelete = async (user) => {
-        try {
-            await deleteUser(user.id)
-            setUsers(prev => prev.filter(u => u.id !== user.id))
-        } catch (error) {
-            console.error("Error deleting user: ", error.response?.data);
-        }
-    }
-
-    const handleCreateUser = async (data, user) => {
-        console.log("User Data: ", data);
-
-        try {
-            if (user) {
-                const updatedUser = await updateUser(user.id, data);
-                setUsers(prev => prev.map(u => (u.id === user.id ? updatedUser : u)));
-            } else {
-                const newUser = await createUser(data);
-                setUsers(prev => [
-                    ...prev,
-                    newUser
-                ])
-                setOpen(false)
-            }
-        } catch (error) {
-            console.error("Error creating user: ", error)
-        }
-    }
-    // try {
-    //     const newUser = await createUser(data)
-    //     console.log("Created user: ", newUser);
-    //     setUsers(prev => [
-    //         ...prev,
-    //         newUser
-    //     ])
-    //     setOpen(false)
 
 
     useEffect(() => {
@@ -70,6 +28,7 @@ const Users = () => {
     if (loading) {
         return <p>Loading...</p>
     }
+
     const userColumns = [
         { header: "First Name", accessor: "first_name" },
         { header: "Last Name", accessor: "last_name" },
@@ -80,11 +39,11 @@ const Users = () => {
         {
             header: "Actions",
             render: (row) => (
-                // console.log("ROW", row)
-                // return (<span>test</span>)
-                <div className='flex gap-2'>
+
+                < div className='flex gap-2' >
                     <button
-                        onClick={() => handleEdit(row)}
+
+                        onClick={() => { handleOpenEditModal(row) }}
                         className='px-3 py-1 text-sm bg-zinc-900 text-white rounded-md hover:bg-zinc-800'>
                         Edit
                     </button>
@@ -94,20 +53,78 @@ const Users = () => {
                         className='px-3 py-1 text-sm border border-zinc-300 rounded-md hover:bg-zinc-100'>
                         Delete
                     </button>
-                </div>
+                </div >
             )
         }
     ]
+
+    const handleOpenAddModal = () => {
+        setSelectedUser(null)
+        setIsModalOpen(true)
+    }
+
+    const handleOpenEditModal = (user) => {
+        setSelectedUser(user)
+        setIsModalOpen(true)
+    }
+
+    const handleCloseModal = () => {
+        setSelectedUser(null);
+        setIsModalOpen(false)
+    }
+
+    const handleSaveUser = async (formData, user) => {
+        console.log("User Data: ", formData, user);
+        try {
+            const payload = {
+                ...formData,
+                department_id: Number(formData.department_id),
+                role_id: Number(formData.role_id)
+            }
+            if (user) {
+                const updatedUser = await updateUser(user.id, payload);
+                setUsers(prev => prev.map(u => (u.id === user.id ? updatedUser : u)));
+            } else {
+                const newUser = await createUser(payload);
+                console.log("Created user response:", newUser);
+                setUsers(prev => [
+                    ...prev,
+                    newUser
+                ])
+            }
+            handleCloseModal();
+        } catch (error) {
+            console.error("Error creating user: ", error)
+            console.error("Backend response: ", error.response?.data)
+        }
+    }
+
+    const handleDelete = async (user) => {
+        try {
+            await deleteUser(user.id);
+            setUsers((prev) => prev.filter((u) => u.id !== user.id));
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
+    }
+
     return (
         <div className='flex flex-col'>
-            <div className='p-2 flex justify-end border-2 border-green-500'>
-                <AddButton onClick={() => { setSelectedUser(null); setOpen(true); }}>+ Add User</AddButton>
+            <div className='p-2 flex justify-end'>
+                <AddButton
+                    variant='primary'
+                    onClick={handleOpenAddModal}>
+                    + Add User
+                </AddButton>
             </div>
-            <AddUserModal isOpen={open} onClose={() => { setOpen(false); setSelectedUser(null); }} onSubmit={handleCreateUser} user={selectedUser} />
             <ReTable
                 columns={userColumns}
                 data={users}
             ></ReTable>
+            <AddUserModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onSubmit={handleSaveUser} />
         </div >
     )
 }

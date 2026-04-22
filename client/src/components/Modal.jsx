@@ -13,11 +13,11 @@ const Modal = ({ isOpen, onClose, title, children }) => {
             />
 
             {/* Modal Content */}
-            <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-xl p-6 z-10">
+            <div className="relative z-10 bg-white w-[90%] max-w-2xl h-[85vh] rounded-2xl shadow-xl flex flex-col">
 
                 {/* Header */}
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-zinc-800">
+                <div className="flex justify-between items-center p-6 border-b">
+                    <h2 className="text-xl font-semibold text-zinc-800">
                         {title}
                     </h2>
                     <button onClick={onClose} className="text-zinc-500 hover:text-black">
@@ -26,7 +26,9 @@ const Modal = ({ isOpen, onClose, title, children }) => {
                 </div>
 
                 {/* Body */}
-                {children}
+                <div className="flex-1 overflow-y-auto p-6">
+                    {children}
+                </div>
             </div>
         </div>
     )
