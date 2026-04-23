@@ -3,12 +3,15 @@ import ReTable from '../components/ReTable.jsx';
 import { getUsers, createUser, deleteUser, updateUser } from '../services/userService.js';
 import AddButton from '../components/AddButton.jsx';
 import AddUserModal from '../components/AddUserModal.jsx';
+import Modal from '../components/Modal.jsx';
 
 const Users = () => {
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedUser, setSelectedUser] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
 
 
     useEffect(() => {
@@ -39,17 +42,15 @@ const Users = () => {
         {
             header: "Actions",
             render: (row) => (
-
                 < div className='flex gap-2' >
                     <button
-
                         onClick={() => { handleOpenEditModal(row) }}
                         className='px-3 py-1 text-sm bg-zinc-900 text-white rounded-md hover:bg-zinc-800'>
                         Edit
                     </button>
 
                     <button
-                        onClick={() => handleDelete(row)}
+                        onClick={() => handleOpenDeleteModal(row)}
                         className='px-3 py-1 text-sm border border-zinc-300 rounded-md hover:bg-zinc-100'>
                         Delete
                     </button>
@@ -71,6 +72,16 @@ const Users = () => {
     const handleCloseModal = () => {
         setSelectedUser(null);
         setIsModalOpen(false)
+    }
+
+    const handleOpenDeleteModal = (user) => {
+        setSelectedUser(user)
+        deleteTitle = `Are you sure you want to delete ${user}?`
+        setIsDeleteModalOpen(true)
+    }
+
+    const handleCloseDeleteModal = () => {
+        setIsDeleteModalOpen(false)
     }
 
     const handleSaveUser = async (formData, user) => {
@@ -105,6 +116,7 @@ const Users = () => {
             setUsers((prev) => prev.filter((u) => u.id !== user.id));
         } catch (error) {
             console.error('Error deleting user:', error);
+            console.error("Backend response: ", error.response?.data)
         }
     }
 
@@ -124,7 +136,32 @@ const Users = () => {
             <AddUserModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
-                onSubmit={handleSaveUser} />
+                onSubmit={handleSaveUser}
+                user={selectedUser}
+            />
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onClose={handleCloseDeleteModal}
+                title="Warning..."
+                user={selectedUser}>
+                <>
+                    <div>
+                        <p>Are you sure you want to delete this user ?</p>
+                        <div className='flex p-4 gap-2 justify-end'>
+                            <button
+                                onClick={handleCloseDeleteModal}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'>
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleDelete(selectedUser)}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm'>
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </>
+            </Modal>
         </div >
     )
 }

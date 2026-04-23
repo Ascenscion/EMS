@@ -1,10 +1,16 @@
 import React from "react"
 
-const Modal = ({ isOpen, onClose, title, children }) => {
+const Modal = ({
+    isOpen,
+    onClose,
+    title,
+    children,
+    maxWidth = "max-w-lg"
+}) => {
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
 
             {/* Overlay */}
             <div
@@ -13,7 +19,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
             />
 
             {/* Modal Content */}
-            <div className="relative z-10 bg-white w-[90%] max-w-2xl h-[85vh] rounded-2xl shadow-xl flex flex-col">
+            <div className={`relative z-10 w-full ${maxWidth} max-h-[90vh] rounded-2xl bg-white shadow-xl flex flex-col`}>
 
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b">
@@ -26,7 +32,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
                 </div>
 
                 {/* Body */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="p-6 overflow-y-auto">
                     {children}
                 </div>
             </div>
