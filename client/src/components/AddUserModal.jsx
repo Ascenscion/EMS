@@ -1,12 +1,17 @@
 import React, { useEffect } from "react"
 import Modal from "../components/Modal"
 import AddButton from "../components/AddButton"
-import Input from "../components/Input"
+import InputWrap from "./InputWrap"
 import { useForm } from "react-hook-form"
 
 
 const AddUserModal = ({ isOpen, onClose, onSubmit, user }) => {
-    const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors }
+    } = useForm({
         defaultValues: {
             first_name: "",
             last_name: "",
@@ -53,62 +58,81 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, user }) => {
             onClose={onClose}
             title={user ? "Edit User" : "Add New User"}>
 
+            {/* InputWrap is a Wrapper that handles validation, needs rules and displays errors and also styles the Input component. */}
+            {/* Register, rules, reset are useForm Hook props. */}
+            {/* handleSubmit is a function from useForm */}
+            {/* handleSubmit builds a data = {} object containing all the input fields, and handle the validation. Once validation is correct, it calls submitHandler */}
             <form
                 onSubmit={handleSubmit(submitHandler)}
                 className="flex flex-col gap-4">
                 <div>
-                    <Input
+                    <InputWrap
                         label="First Name"
                         name="first_name"
-                        register={(name) =>
-                            register(name, {
-                                required: "First name is required",
-                                pattern: {
-                                    value: /^[A-Za-z]+$/,
-                                    message: "First name can only contain letters."
-                                }
-                            })
-                        } />
-                    {errors.first_name && (
-                        <p className="text-red-500 text-sm">{errors.first_name.message}</p>
-                    )}
+                        type="text"
+                        register={register}
+                        rules={{
+                            required: "First name is required",
+                            pattern: {
+                                value: /^[A-Za-z]+$/,
+                                message: "First name can only contain letters."
+                            }
+                        }}
+                        error={errors.first_name}
+                    />
                 </div>
                 <div>
-                    <Input
+                    <InputWrap
                         label="Last Name"
                         name="last_name"
-                        register={(name) =>
-                            register(name, {
-                                required: "Last name is required",
-                                pattern: {
-                                    value: /^[A-Za-z]+$/,
-                                    message: "Last name can only contain letters."
-                                }
-                            })
-                        } />
-                    {errors.last_name && (
-                        <p className="text-red-500 text-sm">{errors.last_name.message}</p>
-                    )}
+                        type="text"
+                        register={register}
+                        rules={{
+                            required: "Last name is required",
+                            pattern: {
+                                value: /^[A-Za-z]+$/,
+                                message: "Last name can only contain letters"
+                            }
+                        }}
+                        error={errors.last_name}
+                    />
                 </div>
                 <div>
-                    <Input
+                    <InputWrap
                         label="Email"
                         name="email"
-                        type="email"
-                        register={(name) =>
-                            register(name, {
-                                required: "Email is required"
-                            })
-                        } />
-                    {errors.email && (
-                        <p className="text-red-500 text-sm">{errors.email.message}</p>
-
-                    )}
+                        type="text"
+                        register={register}
+                        rules={{
+                            required: "Email is required",
+                            pattern: {
+                                value: /^\S+@\S+\.\S+$/,
+                                message: "Must contain valid email address"
+                            }
+                        }}
+                        error={errors.email}
+                    />
                 </div>
-                <Input label="Phone" name="phone" register={register} />
-                {!user && <Input label="Password" name="password" register={register} />}
-                <Input label="Department" name="department_id" register={register} />
-                <Input label="Role" name="role_id" register={register} />
+                <InputWrap
+                    label="Phone"
+                    name="phone"
+                    register={register}
+                    rules={{
+                        required: "Phone number is required",
+                        pattern: {
+                            value: /^[0-9()+-\s]{10,20}$/,
+                            message: "Must contain valid phone number"
+                        }
+                    }}
+                    error={errors.email} />
+                {!user &&
+                    <InputWrap
+                        label="Password"
+                        name="password"
+                        type="password"
+                        register={register} />}
+                <InputWrap label="Department" name="department_id" register={register} />
+                <InputWrap label="Role" name="role_id" register={register} />
 
 
                 <div className="flex justify-end gap-2 mt-4">
