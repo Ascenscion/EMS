@@ -71,20 +71,45 @@ export async function updateUser({ params, body }) {
     return updatedUser;
 }
 
-export async function deleteUser({ params }) {
-    const deleted = await User.destroy({
-        where: { id: params.id }
-    });
-    if (!deleted) {
-        return { error: "User not found." }
-    }
-    return { message: "User deleted" }
-    // const user = await User.findByPk(params.id);
+export async function deleteUser({ params, set }) {
+    try {
+        const deleted = await User.destroy({
+            where: { id: params.id }
+        });
 
-    // if (!user) {
-    //     return { error: "User not found" }
-    // }
-    // console.log(user);
-    // await user.destroy();
-    // return { message: "User deleted." }
+        if (!deleted) {
+            set.status = 404;
+            return {
+                type: "not_found",
+                message: "User not found,"
+            }
+        }
+        return {
+            type: "success",
+            message: "User deleted successfully"
+        }
+    } catch (error) {
+        console.error("Delete user error: ", error);
+
+        const errorMessage =
+            error?.original?.message ||
+            error?.parent?.message ||
+            error?.message ||
+            String(error);
+
+        if (errorMessage.includes("REFERENCE constraint") ||
+            errorMessage.includes("conflicted with the REFERENCE constraint")) {
+            set.status = 409;
+            return {
+                type: "reference_constraint",
+                message: "This user cannot be deleted because they have related records"
+            }
+        }
+
+        set.status = 500
+        return {
+            type: "server_error",
+            message: "Something went wrong while deleting the user."
+        }
+    }
 }

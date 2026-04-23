@@ -11,8 +11,11 @@ const Users = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedUser, setSelectedUser] = useState(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-
+    const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+    const [isUserCreatedSuccesfullyModalOpen, setIsUserCreatedSuccesfullyModalOpen] = useState(false);
+    const [isUserUpdatedSuccesfullyModalOpen, setIsUserUpdatedSuccesfullyModalOpen] = useState(false);
+    const [deleteErrorMessage, setDeleteErrorMessage] = useState("");
+    const [openDeleteFailedModal, setOpenDeleteFailedModal] = useState(false);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -76,7 +79,7 @@ const Users = () => {
 
     const handleOpenDeleteModal = (user) => {
         setSelectedUser(user)
-        deleteTitle = `Are you sure you want to delete ${user}?`
+        //deleteTitle = `Are you sure you want to delete ${user}?`
         setIsDeleteModalOpen(true)
     }
 
@@ -84,6 +87,38 @@ const Users = () => {
         setIsDeleteModalOpen(false)
     }
 
+    const handleOpenConfirmationModal = () => {
+        setIsConfirmationModalOpen(true)
+    }
+
+    const handleCloseConfirmationModal = () => {
+        setIsConfirmationModalOpen(false)
+    }
+
+    const handleCloseUserCreatedModal = () => {
+        setIsUserCreatedSuccesfullyModalOpen(false)
+    }
+
+    const handleOpenUserCreatedModal = () => {
+        setIsUserCreatedSuccesfullyModalOpen(true)
+    }
+
+    const handleOpenUpdatedUserConfirmationModal = () => {
+        setIsUserUpdatedSuccesfullyModalOpen(true)
+    }
+
+    const handleCloseUpdatedUserConfirmationModal = () => {
+        setIsUserUpdatedSuccesfullyModalOpen(false)
+    }
+
+    const handleOpenDeleteFailedModal = () => {
+        setOpenDeleteFailedModal(true)
+    }
+
+    const handleCloseDeleteFailedModal = () => {
+        setOpenDeleteFailedModal(false)
+        setDeleteErrorMessage("");
+    }
     const handleSaveUser = async (formData, user) => {
         console.log("User Data: ", formData, user);
         try {
@@ -93,8 +128,12 @@ const Users = () => {
                 role_id: Number(formData.role_id)
             }
             if (user) {
+                delete payload.password;
+
                 const updatedUser = await updateUser(user.id, payload);
                 setUsers(prev => prev.map(u => (u.id === user.id ? updatedUser : u)));
+                handleCloseModal();
+                handleOpenUpdatedUserConfirmationModal();
             } else {
                 const newUser = await createUser(payload);
                 console.log("Created user response:", newUser);
@@ -102,8 +141,10 @@ const Users = () => {
                     ...prev,
                     newUser
                 ])
+                handleCloseModal();
+                handleOpenUserCreatedModal();
             }
-            handleCloseModal();
+
         } catch (error) {
             console.error("Error creating user: ", error)
             console.error("Backend response: ", error.response?.data)
@@ -111,12 +152,24 @@ const Users = () => {
     }
 
     const handleDelete = async (user) => {
+        console.log("DELETE BUTTON CLICKED", user);
         try {
-            await deleteUser(user.id);
+            const result = await deleteUser(user.id);
+            console.log("Delete success:", result);
             setUsers((prev) => prev.filter((u) => u.id !== user.id));
+            handleCloseDeleteModal();
+            handleOpenConfirmationModal();
         } catch (error) {
-            console.error('Error deleting user:', error);
-            console.error("Backend response: ", error.response?.data)
+            const backendError = error.response?.data;
+
+            const message =
+                backendError?.message ||
+                backendError ||
+                "Failed to delete user.";
+
+            setDeleteErrorMessage(message);
+            handleCloseDeleteModal()
+            handleOpenDeleteFailedModal();
         }
     }
 
@@ -159,6 +212,75 @@ const Users = () => {
                                 Confirm
                             </button>
                         </div>
+                    </div>
+                </>
+            </Modal>
+            <Modal
+                isOpen={isConfirmationModalOpen}
+                onClose={handleCloseConfirmationModal}
+                title={"Success !"}
+                user={selectedUser}
+            >
+                <>
+                    <div className='flex flex-col'>
+                        <p>User has been deleted.</p>
+                        <div className='flex justify-end'>
+                            <button
+                                onClick={handleCloseConfirmationModal}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'
+                            >
+                                Bye Felicia.
+                            </button>
+                        </div>
+                    </div>
+                </>
+            </Modal>
+            <Modal
+                isOpen={isUserCreatedSuccesfullyModalOpen}
+                title={"Success!"}
+                onClose={handleCloseUserCreatedModal}
+            >
+                <>
+                    <p>User Created Succesfully </p>
+                    <div className='flex justify-end'>
+                        <button
+                            onClick={handleCloseUserCreatedModal}
+                            className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm'
+                        >
+                            Confirm</button>
+                    </div>
+                </>
+            </Modal>
+            <Modal
+                isOpen={isUserUpdatedSuccesfullyModalOpen}
+                title={"Success!"}
+                onClose={handleCloseUpdatedUserConfirmationModal}
+            >
+                <>
+                    <p>User Updated Succesfully!</p>
+                    <div className='flex justify-end'>
+                        <button
+                            onClick={handleCloseUpdatedUserConfirmationModal}
+                            className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm'
+                        >
+                            Confirm
+                        </button>
+                    </div>
+                </>
+            </Modal>
+            <Modal
+                isOpen={openDeleteFailedModal}
+                onClose={handleCloseDeleteFailedModal}
+                title="Cannot delete user">
+                <>
+                    <p>{deleteErrorMessage}</p>
+                    <div className='flex justify-end mt-4'>
+                        <button
+                            onClick={handleCloseDeleteFailedModal}
+                            className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm'
+                        >
+                            Okay
+                        </button>
                     </div>
                 </>
             </Modal>

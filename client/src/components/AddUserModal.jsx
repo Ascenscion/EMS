@@ -124,7 +124,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, user }) => {
                             message: "Must contain valid phone number"
                         }
                     }}
-                    error={errors.email} />
+                    error={errors.phone} />
                 {!user &&
                     <InputWrap
                         label="Password"
@@ -137,6 +137,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, user }) => {
 
                 <div className="flex justify-end gap-2 mt-4">
                     <AddButton
+                        type="button"
                         variant="secondary"
                         onClick={onClose}>
                         Cancel
