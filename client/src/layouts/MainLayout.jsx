@@ -10,7 +10,7 @@ const MainLayout = () => {
             {/* <Navbar /> */}
             <div className='flex min-w-screen'>
                 <Sidebar />
-                <main className='flex-1 w-full overflow-x-auto p-6 border-3 border-blue-500'>
+                <main className='flex-1 w-full overflow-x-auto p-2 border-3 border-blue-500'>
                     <Outlet />
                 </main>
             </div>

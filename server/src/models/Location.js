@@ -15,9 +15,13 @@ export default (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
-            street: {
+            address_line_1: {
                 type: DataTypes.STRING,
                 allowNull: false
+            },
+            address_line_2: {
+                type: DataTypes.STRING,
+                allowNull: true
             },
             city: {
                 type: DataTypes.STRING,

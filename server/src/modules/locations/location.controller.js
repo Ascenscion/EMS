@@ -4,10 +4,11 @@ import db from "../../models/index.js"
 const { Location } = db;
 
 export async function createLocation({ body }) {
-    const { name, street, city, state, zip_code } = body;
+    const { name, address_line_1, address_line_2, city, state, zip_code } = body;
     const location = await Location.create({
         name,
-        street,
+        address_line_1,
+        address_line_2,
         city,
         state,
         zip_code

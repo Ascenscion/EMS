@@ -23,9 +23,17 @@ export default (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            status: {
+            max_users: {
+                type: DataTypes.INTEGER,
+                allowNull: false
+            },
+            description: {
                 type: DataTypes.STRING,
                 allowNull: false
+            },
+            status: {
+                type: DataTypes.STRING,
+                allowNull: true
             },
             created_by: {
                 type: DataTypes.INTEGER,
@@ -39,7 +47,6 @@ export default (sequelize, DataTypes) => {
                     key: "id"
                 }
             }
-
         },
         {
             sequelize,

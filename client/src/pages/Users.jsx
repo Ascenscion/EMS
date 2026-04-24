@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import ReTable from '../components/ReTable.jsx';
 import { getUsers, createUser, deleteUser, updateUser } from '../services/userService.js';
 import AddButton from '../components/AddButton.jsx';
-import AddUserModal from '../components/AddUserModal.jsx';
+import UserModal from '../components/UserModal.jsx';
 import Modal from '../components/Modal.jsx';
 
 const Users = () => {
@@ -186,7 +186,7 @@ const Users = () => {
                 columns={userColumns}
                 data={users}
             ></ReTable>
-            <AddUserModal
+            <UserModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 onSubmit={handleSaveUser}

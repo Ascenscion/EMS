@@ -5,7 +5,11 @@ export const createLocationSchema = t.Object({
         minLength: 2,
         maxLength: 100,
     }),
-    street: t.String({
+    address_line_1: t.String({
+        minLength: 2,
+        maxLength: 100
+    }),
+    address_line_2: t.String({
         minLength: 2,
         maxLength: 100
     }),
@@ -17,9 +21,9 @@ export const createLocationSchema = t.Object({
         minLength: 2,
         maxLength: 100
     }),
-    zip_code: t.Integer({
+    zip_code: t.String({
         minLength: 5,
-        maxLength: 5
+        maxLength: 10
     })
 })
 

@@ -67,6 +67,8 @@ export async function seedDatabase(db) {
             name: "Lollapalooza Chicago",
             start_date: "2026-07-30",
             end_date: "2026-08-02",
+            max_users: 5,
+            description: "this is a description",
             status: "draft",
             created_by: 1,
             location_id: 1
@@ -75,6 +77,8 @@ export async function seedDatabase(db) {
             name: "Summer Smash Festival",
             start_date: "2026-06-20",
             end_date: "2026-06-22",
+            max_users: 5,
+            description: "this is a description",
             status: "active",
             created_by: 1,
             location_id: 2
@@ -83,6 +87,8 @@ export async function seedDatabase(db) {
             name: "North Coast Music Festival",
             start_date: "2026-09-04",
             end_date: "2026-09-06",
+            max_users: 5,
+            description: "this is a description",
             status: "completed",
             created_by: 1,
             location_id: 3
@@ -91,6 +97,8 @@ export async function seedDatabase(db) {
             name: "Arc Music Festival",
             start_date: "2026-08-29",
             end_date: "2026-08-31",
+            max_users: 5,
+            description: "this is a description",
             status: "draft",
             created_by: 1,
             location_id: 1
@@ -99,6 +107,8 @@ export async function seedDatabase(db) {
             name: "Chicago Jazz Festival",
             start_date: "2026-08-27",
             end_date: "2026-08-30",
+            max_users: 5,
+            description: "this is a description",
             status: "active",
             created_by: 1,
             location_id: 2
@@ -108,35 +118,35 @@ export async function seedDatabase(db) {
     const locations = [
         {
             name: "Main Convention Center",
-            street: "123 Downtown Ave",
+            address_line_1: "123 Downtown Ave",
             city: "Chicago",
             state: "IL",
             zip_code: "60601",
         },
         {
             name: "Lakeside Park Pavilion",
-            street: "455 Lake Shore Dr",
+            address_line_1: "455 Lake Shore Dr",
             city: "Chicago",
             state: "IL",
             zip_code: "60611",
         },
         {
             name: "West Community Hall",
-            street: "890 West Madison St",
+            address_line_1: "890 West Madison St",
             city: "Chicago",
             state: "IL",
             zip_code: "60607",
         },
         {
             name: "North Event Plaza",
-            street: "2100 Lincoln Ave",
+            address_line_1: "2100 Lincoln Ave",
             city: "Chicago",
             state: "IL",
             zip_code: "60614",
         },
         {
             name: "South Expo Center",
-            street: "7750 South Halsted St",
+            address_line_1: "7750 South Halsted St",
             city: "Chicago",
             state: "IL",
             zip_code: "60620",

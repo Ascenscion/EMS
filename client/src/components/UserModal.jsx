@@ -1,11 +1,11 @@
 import React, { useEffect } from "react"
-import Modal from "../components/Modal"
-import AddButton from "../components/AddButton"
+import Modal from "./Modal"
+import AddButton from "./AddButton"
 import InputWrap from "./InputWrap"
 import { useForm } from "react-hook-form"
 
 
-const AddUserModal = ({ isOpen, onClose, onSubmit, user }) => {
+const UserModal = ({ isOpen, onClose, onSubmit, user }) => {
     const {
         register,
         handleSubmit,
@@ -62,6 +62,15 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, user }) => {
             {/* Register, rules, reset are useForm Hook props. */}
             {/* handleSubmit is a function from useForm */}
             {/* handleSubmit builds a data = {} object containing all the input fields, and handle the validation. Once validation is correct, it calls submitHandler */}
+            {/* onSubit is the React form event */}
+            {/* handleSubmit is from react-hook-form. Validates and collects all registerd input values */}
+            {/* submitHandler is your function. React hook form calls it only if the form is valid. */}
+            {/* User clicks Save
+                → form onSubmit runs
+                → handleSubmit checks validation
+                → if valid, it builds data object
+                → handleSubmit calls submitHandler(data)
+                → submitHandler sends data to parent/backend */}
             <form
                 onSubmit={handleSubmit(submitHandler)}
                 className="flex flex-col gap-4">
@@ -152,4 +161,4 @@ const AddUserModal = ({ isOpen, onClose, onSubmit, user }) => {
     )
 }
 
-export default AddUserModal
+export default UserModal

@@ -1,26 +1,69 @@
 import db from "../../models/index.js"
+import { createLocation } from "../locations/location.controller.js";
 
-const { Event } = db;
+const { Event, Location } = db;
 
-export async function createEvent({ body }) {
-    const { name, start_date, end_date, status, created_by, location_id } = body;
+export async function createEvent({ body, set }) {
+    try {
+        const {
+            name,
+            start_date,
+            end_date,
+            max_users,
+            description,
+            status,
+            created_by,
 
-    const start = new Date(start_date.split('/').reverse().join('-'));
-    const end = new Date(end_date.split('/').reverse().join('-'));
-    if (end < start) {
-        return { error: "End date must be after start date" }
+            location_name,
+            address_line_1,
+            address_line_2,
+            city,
+            state,
+            zip_code,
+        } = body;
+
+        const start = new Date(start_date.split('/').reverse().join('-'));
+        const end = new Date(end_date.split('/').reverse().join('-'));
+
+        if (end < start) {
+            return { error: "End date must be after start date" }
+        }
+
+        const location = await Location.create({
+            name: location_name,
+            address_line_1,
+            address_line_2,
+            city,
+            state,
+            zip_code
+        });
+
+        const event = await Event.create({
+            name,
+            start_date,
+            end_date,
+            max_users,
+            description,
+            status,
+            created_by,
+            location_id: location.id
+        })
+
+        return {
+            ...event.toJSON(),
+            location: location.toJSON()
+        }
+    } catch (error) {
+        console.error("Error creating event:", error);
+        console.error("Error message:", error.message);
+        console.error("SQL error:", error.original?.message);
+
+        set.status = 500;
+        return {
+            error: "Could not create event",
+            details: error.original?.message || error.message
+        };
     }
-
-    const event = await Event.create({
-        name,
-        start_date,
-        end_date,
-        status,
-        created_by,
-        location_id
-    })
-    console.log(event);
-    return event;
 }
 
 export async function getAllEvents() {

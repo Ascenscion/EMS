@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import AddButton from '../components/AddButton'
 import ReTable from '../components/ReTable'
-import { getEvents } from '../services/eventService'
+import { createEvent, getEvents, updateEvent } from '../services/eventService'
+import Modal from '../components/Modal'
+import EventModal from '../components/EventModal'
 
 const Events = () => {
     const [loading, setLoading] = useState(false)
     const [events, setEvents] = useState([])
+    const [selectedEvent, setSelectedEvent] = useState(null)
+    const [isEventModalOpen, setIsEventModalOpen] = useState(false)
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -24,11 +28,36 @@ const Events = () => {
     }, [])
 
     const handleOpenCreateNewEventModal = () => {
-
+        setSelectedEvent(null)
+        setIsEventModalOpen(true)
     }
 
     const handleCloseCreateNewEventModal = () => {
+        setIsEventModalOpen(false)
+    }
 
+    const handleSaveEvent = async (formData, event) => {
+        const payload = {
+            ...formData,
+            created_by: 1,
+            status: "active"
+        }
+        try {
+            if (event) {
+                const updatedEvent = await updateEvent(event.id, payload);
+                setEvents((prev) =>
+                    prev.map((e) => e.id === event.id ? updatedEvent : e)
+                )
+            } else {
+                console.log("FORM DATA: ", payload);
+                const newEvent = await createEvent(payload);
+                setEvents((prev) => [...prev, newEvent]);
+            }
+            handleCloseCreateNewEventModal();
+        } catch (error) {
+            console.error("Error saving event: ", error)
+            console.error("Backend Response: ", error.response?.data)
+        }
     }
 
     const eventColumns = [
@@ -73,6 +102,14 @@ const Events = () => {
                 columns={eventColumns}
                 data={events}>
             </ReTable>
+            <EventModal
+                isOpen={isEventModalOpen}
+                onClose={handleCloseCreateNewEventModal}
+                onSubmit={handleSaveEvent}
+            >
+            </EventModal>
+
+
         </div>
     )
 }
