@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import InputWrap from './InputWrap'
 import AddButton from './AddButton'
 import TextAreaWrap from './TextAreaWrap'
+import { useEffect } from 'react'
 
 const EventModal = ({ isOpen, onClose, event, onSubmit }) => {
     const {
@@ -23,6 +24,49 @@ const EventModal = ({ isOpen, onClose, event, onSubmit }) => {
             created_by: "",
         }
     })
+
+    useEffect(() => {
+        if (event) {
+            console.log("THIS IS EVENT: ", event);
+            console.log("LOC NAME", event.Location.name);
+            reset({
+                name: event.name || "",
+                location_id: event.location_id || "",
+                max_users: event.max_users || "",
+                description: event.description || "",
+                status: event.status || "",
+                start_date: event.start_date?.slice(0, 10) || "",
+                end_date: event.end_date?.slice(0, 10) || "",
+                created_by: event.created_by || "",
+
+                location_name: event.Location?.name || "",
+                address_line_1: event.Location?.address_line_1 || "",
+                address_line_2: event.Location?.address_line_2 || "",
+                city: event.Location?.city || "",
+                state: event.Location?.state || "",
+                zip_code: event.Location?.zip_code || ""
+            })
+        } else {
+            reset({
+                name: "",
+                location_id: "",
+                max_users: "",
+                description: "",
+                status: "",
+                start_date: "",
+                end_date: "",
+                created_by: "",
+
+                location_name: "",
+                address_line_1: "",
+                address_line_2: "",
+                city: "",
+                state: "",
+                zip_code: ""
+
+            })
+        }
+    }, [event, isOpen, reset])
 
     const submitHandler = async (data) => {
         console.log(data);

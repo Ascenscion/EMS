@@ -67,7 +67,14 @@ export async function createEvent({ body, set }) {
 }
 
 export async function getAllEvents() {
-    const events = await Event.findAll();
+    const events = await Event.findAll({
+        include: [
+            {
+                model: Location,
+            }
+        ]
+    })
+    console.log("EVENT CONTROLLER: ", events.Location);
     return events;
 }
 
@@ -96,4 +103,6 @@ export async function deleteEvent({ params }) {
     })
     return deleted;
 }
+
+
 

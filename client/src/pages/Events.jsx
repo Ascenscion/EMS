@@ -8,6 +8,7 @@ import EventModal from '../components/EventModal'
 const Events = () => {
     const [loading, setLoading] = useState(false)
     const [events, setEvents] = useState([])
+    const [locations, setLocations] = useState([])
     const [selectedEvent, setSelectedEvent] = useState(null)
     const [isEventModalOpen, setIsEventModalOpen] = useState(false)
 
@@ -36,6 +37,11 @@ const Events = () => {
         setIsEventModalOpen(false)
     }
 
+    const handleOpenEditEventModal = (event) => {
+        setSelectedEvent(event)
+        setIsEventModalOpen(true)
+    }
+
     const handleSaveEvent = async (formData, event) => {
         const payload = {
             ...formData,
@@ -48,6 +54,8 @@ const Events = () => {
                 setEvents((prev) =>
                     prev.map((e) => e.id === event.id ? updatedEvent : e)
                 )
+                handleCloseCreateNewEventModal();
+                handleOpenUpdatedEventConfirmationModal();
             } else {
                 console.log("FORM DATA: ", payload);
                 const newEvent = await createEvent(payload);
@@ -75,12 +83,12 @@ const Events = () => {
                 <div className='flex gap-2'>
                     {console.log("ROW", row)}
                     <button
-                        //onClick={handleOpenEditEventModal(row)}
+                        onClick={() => handleOpenEditEventModal(row)}
                         className='px-3 py-1 text-sm bg-zinc-900 text-white rounded-md hover:bg-zinc-800'>
                         Edit
                     </button>
                     <button
-                        //onClick={() => handleOpenDeleteEventModal(row)}
+                        onClick={() => handleOpenDeleteEventModal(row)}
                         className='px-3 py-1 text-sm border border-zinc-300 rounded-md hover:bg-zinc-100'>
                         Delete
                     </button>
@@ -106,6 +114,7 @@ const Events = () => {
                 isOpen={isEventModalOpen}
                 onClose={handleCloseCreateNewEventModal}
                 onSubmit={handleSaveEvent}
+                event={selectedEvent}
             >
             </EventModal>
 
