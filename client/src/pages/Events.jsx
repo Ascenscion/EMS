@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import AddButton from '../components/AddButton'
 import ReTable from '../components/ReTable'
-import { createEvent, getEvents, updateEvent } from '../services/eventService'
+import { createEvent, deleteEvent, getEvents, updateEvent } from '../services/eventService'
 import Modal from '../components/Modal'
 import EventModal from '../components/EventModal'
 
@@ -11,6 +11,7 @@ const Events = () => {
     const [locations, setLocations] = useState([])
     const [selectedEvent, setSelectedEvent] = useState(null)
     const [isEventModalOpen, setIsEventModalOpen] = useState(false)
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -45,6 +46,15 @@ const Events = () => {
         setIsEventModalOpen(true)
     }
 
+    const handleOpenDeleteEventModal = (event) => {
+        setSelectedEvent(event)
+        setIsDeleteModalOpen(true)
+    }
+
+    const handleCloseDeleteEventModal = () => {
+        setIsDeleteModalOpen(false)
+    }
+
     const handleSaveEvent = async (formData, event) => {
         const payload = {
             ...formData,
@@ -67,6 +77,21 @@ const Events = () => {
         } catch (error) {
             console.error("Error saving event: ", error)
             console.error("Backend Response: ", error.response?.data)
+        }
+    }
+
+    const handleDeleteEvent = async (event) => {
+        try {
+            const result = await deleteEvent(event.id);
+            setEvents((prev) => prev.filter((u) => u.id !== event.id));
+            handleCloseDeleteEventModal();
+        } catch (error) {
+            const backendError = error.response?.data;
+            const message =
+                backendError?.message ||
+                backendError ||
+                "Failed to delete event";
+            handleCloseDeleteEventModal();
         }
     }
 
@@ -119,7 +144,29 @@ const Events = () => {
                 event={selectedEvent}
             >
             </EventModal>
-
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onClose={handleCloseDeleteEventModal}
+                title="Warning..."
+                event={selectedEvent}>
+                <>
+                    <div>
+                        <p>Are you sure you want to delete this event ?</p>
+                        <div className='flex p-4 gap-2 justify-end'>
+                            <button
+                                onClick={handleCloseDeleteEventModal}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'>
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleDeleteEvent(selectedEvent)}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm'>
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </>
+            </Modal>
 
         </div>
     )

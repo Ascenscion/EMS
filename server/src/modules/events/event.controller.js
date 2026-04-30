@@ -74,7 +74,7 @@ export async function getAllEvents() {
             }
         ]
     })
-    console.log("EVENT CONTROLLER: ", events.Location);
+
     return events;
 }
 
