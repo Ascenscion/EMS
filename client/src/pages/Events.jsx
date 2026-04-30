@@ -12,6 +12,9 @@ const Events = () => {
     const [selectedEvent, setSelectedEvent] = useState(null)
     const [isEventModalOpen, setIsEventModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [isDeleteConfirmationModalOpen, setIsDeleteConfirmationModalOpen] = useState(false)
+    const [isEventCreatedSuccesModalOpen, setIsEventCreatedSuccessModalOpen] = useState(false)
+    const [isEventUpdatedSucccesModalOpen, setIsUpdatedSuccessModalOpen] = useState(false)
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -55,6 +58,30 @@ const Events = () => {
         setIsDeleteModalOpen(false)
     }
 
+    const handleOpenDeleteConfirmationModal = (event) => {
+        setIsDeleteConfirmationModalOpen(true)
+    }
+
+    const handleCloseDeleteConfirmationModal = () => {
+        setIsDeleteConfirmationModalOpen(false)
+    }
+
+    const handleOpenEventCreatedModal = () => {
+        setIsEventCreatedSuccessModalOpen(true)
+    }
+
+    const handleCloseEventCreatedModal = () => {
+        setIsEventCreatedSuccessModalOpen(false)
+    }
+
+    const handleOpenEventUpdatedModal = () => {
+        setIsUpdatedSuccessModalOpen(true)
+    }
+
+    const handleCloseEventUpdatedModal = () => {
+        setIsUpdatedSuccessModalOpen(false)
+    }
+
     const handleSaveEvent = async (formData, event) => {
         const payload = {
             ...formData,
@@ -68,10 +95,11 @@ const Events = () => {
                 setEvents((prev) =>
                     prev.map((e) => e.id === event.id ? updatedEvent : e)
                 )
-                //handleOpenUpdatedEventConfirmationModal();
+                handleOpenEventUpdatedModal();
             } else {
                 const newEvent = await createEvent(payload);
                 setEvents((prev) => [...prev, newEvent]);
+                handleOpenEventCreatedModal();
             }
             handleCloseCreateNewEventModal();
         } catch (error) {
@@ -85,6 +113,7 @@ const Events = () => {
             const result = await deleteEvent(event.id);
             setEvents((prev) => prev.filter((u) => u.id !== event.id));
             handleCloseDeleteEventModal();
+            handleOpenDeleteConfirmationModal(true)
         } catch (error) {
             const backendError = error.response?.data;
             const message =
@@ -167,7 +196,66 @@ const Events = () => {
                     </div>
                 </>
             </Modal>
-
+            <Modal
+                isOpen={isDeleteConfirmationModalOpen}
+                onClose={handleCloseDeleteConfirmationModal}
+                title={"Success !"}
+                event={selectedEvent}
+            >
+                <>
+                    <div className='flex flex-col'>
+                        <p>Event has been deleted.</p>
+                        <div className='flex justify-end'>
+                            <button
+                                onClick={handleCloseDeleteConfirmationModal}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'
+                            >
+                                Bye Felicia.
+                            </button>
+                        </div>
+                    </div>
+                </>
+            </Modal>
+            <Modal
+                isOpen={isEventCreatedSuccesModalOpen}
+                onClose={handleCloseEventCreatedModal}
+                title={"Success !"}
+                event={selectedEvent}
+            >
+                <>
+                    <div className='flex flex-col'>
+                        <p>Event has been Created Successfully!.</p>
+                        <div className='flex justify-end'>
+                            <button
+                                onClick={handleCloseEventCreatedModal}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'
+                            >
+                                Success.
+                            </button>
+                        </div>
+                    </div>
+                </>
+            </Modal>
+            <Modal
+                isOpen={isEventUpdatedSucccesModalOpen}
+                onClose={handleCloseEventUpdatedModal}
+                title={"Success !"}
+                event={selectedEvent}
+            >
+                <>
+                    <div className='flex flex-col'>
+                        <p>Event has been Updated Successfully!.</p>
+                        <div className='flex justify-end'>
+                            <button
+                                onClick={handleCloseEventUpdatedModal}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'
+                            >
+                                Success.
+                            </button>
+                        </div>
+                    </div>
+                </>
+            </Modal>
         </div>
     )
 }

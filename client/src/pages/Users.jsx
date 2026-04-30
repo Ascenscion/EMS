@@ -155,7 +155,7 @@ const Users = () => {
         console.log("DELETE BUTTON CLICKED", user);
         try {
             const result = await deleteUser(user.id);
-            console.log("Delete success:", result);
+            //console.log("Delete success:", result);
             setUsers((prev) => prev.filter((u) => u.id !== user.id));
             handleCloseDeleteModal();
             handleOpenConfirmationModal();
