@@ -14,11 +14,9 @@ const Events = () => {
 
     useEffect(() => {
         const fetchEvents = async () => {
-            console.log("THIS IS RUNNING");
             try {
                 const data = await getEvents()
                 setEvents(data)
-                console.log("Event data: ", events[0]);
             } catch (error) {
                 console.log("Error fetching events", error);
             } finally {
@@ -27,6 +25,11 @@ const Events = () => {
         }
         fetchEvents()
     }, [])
+
+    useEffect(() => {
+        console.log("Events state changed:", events)
+        console.log("First event from state:", events[0])
+    }, [events])
 
     const handleOpenCreateNewEventModal = () => {
         setSelectedEvent(null)
@@ -45,6 +48,7 @@ const Events = () => {
     const handleSaveEvent = async (formData, event) => {
         const payload = {
             ...formData,
+            max_users: Number(formData.max_users),
             created_by: 1,
             status: "active"
         }
@@ -54,10 +58,8 @@ const Events = () => {
                 setEvents((prev) =>
                     prev.map((e) => e.id === event.id ? updatedEvent : e)
                 )
-                handleCloseCreateNewEventModal();
-                handleOpenUpdatedEventConfirmationModal();
+                //handleOpenUpdatedEventConfirmationModal();
             } else {
-                console.log("FORM DATA: ", payload);
                 const newEvent = await createEvent(payload);
                 setEvents((prev) => [...prev, newEvent]);
             }
@@ -81,7 +83,7 @@ const Events = () => {
             render: (row) => (
 
                 <div className='flex gap-2'>
-                    {console.log("ROW", row)}
+                    {/* {console.log("ROW", row)} */}
                     <button
                         onClick={() => handleOpenEditEventModal(row)}
                         className='px-3 py-1 text-sm bg-zinc-900 text-white rounded-md hover:bg-zinc-800'>

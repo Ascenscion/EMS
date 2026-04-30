@@ -27,8 +27,6 @@ const EventModal = ({ isOpen, onClose, event, onSubmit }) => {
 
     useEffect(() => {
         if (event) {
-            console.log("THIS IS EVENT: ", event);
-            console.log("LOC NAME", event.Location.name);
             reset({
                 name: event.name || "",
                 location_id: event.location_id || "",
@@ -69,7 +67,6 @@ const EventModal = ({ isOpen, onClose, event, onSubmit }) => {
     }, [event, isOpen, reset])
 
     const submitHandler = async (data) => {
-        console.log(data);
         await onSubmit(data, event)
     }
 

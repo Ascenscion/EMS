@@ -92,9 +92,50 @@ export async function updateEvent({ params, body }) {
         return { error: "Event not found" }
     }
 
-    await event.update(body);
-    const updatedEvent = event.toJSON();
-    return updatedEvent;
+    const {
+        name,
+        start_date,
+        end_date,
+        max_users,
+        description,
+        status,
+        location_name,
+        address_line_1,
+        address_line_2,
+        city,
+        state,
+        zip_code } = body;
+
+    await event.update({
+        name,
+        start_date,
+        end_date,
+        max_users,
+        description,
+        status,
+    });
+
+    await Location.update(
+        {
+            name: location_name,
+            address_line_1,
+            address_line_2,
+            city,
+            state,
+            zip_code
+        },
+        {
+            where: { id: event.location_id }
+        }
+    )
+    const updatedEvent = await Event.findByPk(params.id, {
+        include: [
+            {
+                model: Location
+            }
+        ]
+    })
+    return updatedEvent.toJSON();
 }
 
 export async function deleteEvent({ params }) {
