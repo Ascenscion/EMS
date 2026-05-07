@@ -6,11 +6,11 @@ export const createShiftSchema = t.Object({
         maxLength: 30
     }),
     start_time: t.String({
-        date: t.RegExp(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/),
-        description: "Start time"
+        format: "date-time",
+        description: "Shift start time"
     }),
     end_time: t.String({
-        date: t.RegExp(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/),
+        format: "date-time",
         description: "Start date"
     }),
     required_staff: t.Integer({
