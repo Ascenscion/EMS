@@ -156,79 +156,84 @@ export async function seedDatabase(db) {
     const applications = [
         {
             status: "pending",
-            applied_at: "03/01/2026",
+            applied_at: "2026-05-07 18:00:00",
             reviewed_by_user_id: 1,
             reviewed_at: "03/02/2026",
             user_id: 1,
-            event_id: 1
+            event_id: 1,
+            shift_id: 1
         },
         {
             status: "approved",
-            applied_at: "03/01/2026",
+            applied_at: "2026-05-07 18:00:00",
             reviewed_by_user_id: 2,
             reviewed_at: "03/03/2026",
             user_id: 2,
-            event_id: 1
+            event_id: 1,
+            shift_id: 2
         },
         {
             status: "rejected",
-            applied_at: "03/02/2026",
+            applied_at: "2026-05-07 18:00:00",
             reviewed_by_user_id: 3,
             reviewed_at: "03/04/2026",
             user_id: 3,
-            event_id: 2
+            event_id: 2,
+            shift_id: 3
         },
         {
             status: "approved",
-            applied_at: "03/03/2026",
+            applied_at: "2026-05-07 18:00:00",
             reviewed_by_user_id: 2,
             reviewed_at: "03/05/2026",
             user_id: 4,
-            event_id: 2
+            event_id: 2,
+            shift_id: 1
         },
         {
             status: "pending",
-            applied_at: "03/04/2026",
+            applied_at: "2026-05-07 18:00:00",
             reviewed_by_user_id: 1,
             reviewed_at: "03/06/2026",
             user_id: 5,
-            event_id: 3
+            event_id: 3,
+            shift_id: 2
         }
     ];
 
     const shifts = [
         {
             name: "Morning Setup",
-            start_time: "08:00",
-            end_time: "12:00",
+            start_time: "2026-05-07 18:00:00",
+            end_time: "2026-05-07 22:00:00",
             required_staff: 5,
             event_id: 1
         },
         {
             name: "Afternoon Operations",
-            start_time: "12:00",
-            end_time: "16:00",
+            start_time: "2026-05-07 18:00:00",
+            end_time: "2026-05-07 22:00:00",
             required_staff: 8,
             event_id: 1
         },
         {
             name: "Evening Cleanup",
-            start_time: "16:00",
-            end_time: "20:00",
+            start_time: "2026-05-07 18:00:00",
+            end_time: "2026-05-07 22:00:00",
             required_staff: 4,
             event_id: 1
         },
         {
             name: "Morning Registration",
-            start_time: "09:00",
-            end_time: "13:00",
+            start_time: "2026-05-07 18:00:00",
+            end_time: "2026-05-07 22:00:00",
             required_staff: 6,
             event_id: 2
         },
         {
             name: "Security Coverage",
-            start_time: "13:00",
-            end_time: "18:00",
+            start_time: "2026-05-07 18:00:00",
+            end_time: "2026-05-07 22:00:00",
             required_staff: 3,
             event_id: 3
         }

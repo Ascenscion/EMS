@@ -12,12 +12,16 @@ export default (sequelize, DataTypes) => {
                 autoIncrement: true,
             },
             status: {
-                type: DataTypes.STRING,
+                type: DataTypes.ENUM(
+                    "pending",
+                    "approved",
+                    "rejected"
+                ),
                 allowNull: false,
                 defaultValue: "pending"
             },
             applied_at: {
-                type: DataTypes.STRING,
+                type: DataTypes.DATE,
                 allowNull: true,
             },
             reviewed_by_user_id: {
@@ -29,22 +33,22 @@ export default (sequelize, DataTypes) => {
                 }
             },
             reviewed_at: {
-                type: DataTypes.STRING,
+                type: DataTypes.DATE,
                 allowNull: true
             },
             user_id: {
                 type: DataTypes.INTEGER,
-                allowNull: true,
+                allowNull: false,
                 references: {
                     model: "Users",
                     key: "id"
                 }
             },
-            event_id: {
+            shift_id: {
                 type: DataTypes.INTEGER,
-                allowNull: true,
+                allowNull: false,
                 references: {
-                    model: "Events",
+                    model: "Shifts",
                     key: "id"
                 }
             }
@@ -52,25 +56,35 @@ export default (sequelize, DataTypes) => {
         {
             sequelize,
             modelName: 'Application',
+            indexes: [
+                {
+                    unique: true,
+                    fields: ["user_id", "shift_id"]
+                }
+            ]
         }
     );
 
     Application.associate = (models) => {
         Application.belongsTo(models.User, {
             foreignKey: "user_id",
-            onDelete: "NO ACTION",
-            onUpdate: "NO ACTION"
-        })
-
-        Application.belongsTo(models.Event, {
-            foreignKey: "event_id",
+            as: "applicant",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
         })
 
         Application.belongsTo(models.User, {
             foreignKey: "reviewed_by_user_id",
-            as: "reviewer"
+            as: "reviewer",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
+        })
+
+        Application.belongsTo(models.Shift, {
+            foreignKey: "shift_id",
+            as: "shift",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
         })
     }
     return Application;

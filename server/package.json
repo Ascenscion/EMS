@@ -9,6 +9,13 @@
     "dotenv": "^17.3.1",
     "elysia": "^1.4.27",
     "sequelize": "^6.37.8",
+    "sequelize-cli": "^6.6.5",
     "tedious": "^19.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "scripts": {
+    "dev": "nodemon app.js"
   }
 }

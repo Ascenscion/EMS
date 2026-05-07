@@ -10,7 +10,7 @@ import Assignments from './pages/Assignments'
 function App() {
   return (
     <Routes>
-      {/* <Route path="/login" element={<Login />} /> */}
+      <Route path="/login" element={<Login />} />
       <Route path="/" element={<MainLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/events" element={<Events />} />

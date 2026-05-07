@@ -14,6 +14,10 @@ export default (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
+            middle_name: {
+                type: DataTypes.STRING,
+                allowNull: true
+            },
             last_name: {
                 type: DataTypes.STRING,
                 allowNull: false
@@ -21,7 +25,7 @@ export default (sequelize, DataTypes) => {
             email: {
                 type: DataTypes.STRING,
                 unique: true,
-                allowNull: false,
+                allowNull: true,
                 validate: {
                     isEmail: true
                 }
@@ -32,6 +36,25 @@ export default (sequelize, DataTypes) => {
                 validate: {
                     len: [10, 15]
                 }
+            },
+            address: {
+                type: DataTypes.STRING,
+                allowNull: true
+            },
+            emergency_contact: {
+                type: DataTypes.STRING,
+                allowNull: true
+            },
+            emergency_phone: {
+                type: DataTypes.STRING,
+                allowNull: true,
+                validate: {
+                    len: [10, 15]
+                }
+            },
+            dob: {
+                type: DataTypes.DATEONLY,
+                allowNull: true
             },
             password_hash: {
                 type: DataTypes.STRING(255),

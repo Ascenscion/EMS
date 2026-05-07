@@ -17,11 +17,11 @@ export default (sequelize, DataTypes) => {
                 allowNull: false
             },
             start_time: {
-                type: DataTypes.STRING,
+                type: DataTypes.DATE,
                 allowNull: false
             },
             end_time: {
-                type: DataTypes.STRING,
+                type: DataTypes.DATE,
                 allowNull: false
             },
             required_staff: {
@@ -51,6 +51,13 @@ export default (sequelize, DataTypes) => {
 
         Shift.belongsTo(models.Event, {
             foreignKey: "event_id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
+        })
+
+        Shift.hasMany(models.Application, {
+            foreignKey: "shift_id",
+            as: "applications",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
         })

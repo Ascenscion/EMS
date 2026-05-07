@@ -6,6 +6,9 @@ export const createUserSchema = t.Object({
         minLength: 2,
         maxLength: 50
     }),
+    middle_name: t.String({
+        pattern: "^[A-Za-z]+$"
+    }),
     last_name: t.String({
         pattern: "^[A-Za-z]+$",
         minLength: 2,
@@ -19,7 +22,22 @@ export const createUserSchema = t.Object({
         minLength: 10,
         maxLength: 15
     }),
-    password: t.String({
+    address: t.String({
+        minLength: 10,
+        maxLength: 255
+    }),
+    emergency_contact: t.String({
+        pattern: "^[A-Za-z]+$",
+        minLength: 2,
+        maxLength: 255
+    }),
+    emergency_phone: t.String({
+        pattern: "^[0-9]+$",
+        minLength: 10,
+        maxLength: 15
+    }),
+    //dob missing t.DATE doesnt work.
+    password_hash: t.String({
         pattern: "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{8,}$",
         minLength: 8,
         maxLength: 20
