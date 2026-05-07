@@ -1,20 +1,19 @@
+import { DATE } from "sequelize";
 import db from "../../models/index.js"
 
 const { Application } = db;
 
 export async function createApplication({ body }) {
-    const { status, applied_at, reviewed_by, reviewed_at, user_id, event_id } = body;
-    console.log("STATUS", status);
-
-
+    //const { applied_at, reviewed_by, reviewed_at, user_id, event_id } = body;
+    //console.log("STATUS", status);
 
     const application = await Application.create({
-        status,
-        applied_at,
-        reviewed_at,
-        reviewed_by,
-        user_id,
-        event_id
+        status: "pending",
+        applied_at: new Date(),
+        reviewed_at: null,
+        reviewed_by: null,
+        user_id: body.user_id,
+        shift_id: body.shift_id //This will probably give me an error later
     })
 
     console.log(application);
@@ -39,7 +38,11 @@ export async function updateApplication({ params, body }) {
     if (!application) {
         return { errpr: " No application found" }
     }
-    await application.update(body);
+    await application.update({
+        status: body.status,
+        reviewed_at: new Date(),
+        // reviewed_by_user_id: currentUser.id
+    });
 }
 
 export async function deleteApplication({ params }) {
@@ -48,3 +51,6 @@ export async function deleteApplication({ params }) {
     })
     return deleted;
 }
+
+
+
