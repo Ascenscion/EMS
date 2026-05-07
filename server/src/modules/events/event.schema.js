@@ -7,11 +7,11 @@ export const createEventSchema = t.Object({
         description: "Event name"
     }),
     start_date: t.String({
-        date: t.RegExp(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/),
+        format: "date-time",
         description: "Start date"
     }),
     end_date: t.String({
-        date: t.RegExp(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/),
+        format: "date-time",
         description: "End date"
     }),
     max_users: t.Integer({
@@ -25,28 +25,10 @@ export const createEventSchema = t.Object({
     created_by: t.Integer({
         minimum: 1
     }),
+    location_id: t.Integer({
+        minimum: 1
+    }),
 
-    location_name: t.String({
-        minLength: 2,
-        maxLength: 100
-    }),
-    address_line_1: t.String({
-        minLength: 2,
-        maxLength: 100
-    }),
-    address_line_2: t.Optional(t.String()),
-    city: t.String({
-        minLength: 2,
-        maxLength: 100
-    }),
-    state: t.String({
-        minLength: 2,
-        maxLength: 100
-    }),
-    zip_code: t.String({
-        minLength: 5,
-        maxLength: 10
-    }),
 })
 
 export const updateEventSchema = t.Partial(createEventSchema);

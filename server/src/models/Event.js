@@ -33,6 +33,7 @@ export default (sequelize, DataTypes) => {
             },
             status: {
                 type: DataTypes.STRING,
+                defaultValue: "active",
                 allowNull: true
             },
             created_by: {
