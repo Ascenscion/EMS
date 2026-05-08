@@ -4,6 +4,8 @@ import { getUsers, createUser, deleteUser, updateUser } from '../services/userSe
 import AddButton from '../components/AddButton.jsx';
 import UserModal from '../components/UserModal.jsx';
 import Modal from '../components/Modal.jsx';
+import { getRoles } from "../services/roleService"
+import { getDepartments } from '../services/departmentService.js';
 
 const Users = () => {
     const [users, setUsers] = useState([])
@@ -16,8 +18,20 @@ const Users = () => {
     const [isUserUpdatedSuccesfullyModalOpen, setIsUserUpdatedSuccesfullyModalOpen] = useState(false);
     const [deleteErrorMessage, setDeleteErrorMessage] = useState("");
     const [openDeleteFailedModal, setOpenDeleteFailedModal] = useState(false);
+    const [roles, setRoles] = useState([])
+    const [departments, setDepartments] = useState([])
 
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const roleArray = await getRoles();
+                setRoles(roleArray)
+                const departmentArray = await getDepartments()
+                setDepartments(departmentArray)
+            } catch (error) {
+                console.log("Error fetching roles", error);
+            }
+        }
         const fetchUsers = async () => {
             try {
                 const data = await getUsers()
@@ -28,6 +42,7 @@ const Users = () => {
                 setLoading(false)
             }
         }
+        fetchData()
         fetchUsers()
     }, [])
 
@@ -191,6 +206,8 @@ const Users = () => {
                 onClose={handleCloseModal}
                 onSubmit={handleSaveUser}
                 user={selectedUser}
+                roles={roles}
+                departments={departments}
             />
             <Modal
                 isOpen={isDeleteModalOpen}

@@ -5,7 +5,7 @@ import InputWrap from "./InputWrap"
 import { useForm } from "react-hook-form"
 
 
-const UserModal = ({ isOpen, onClose, onSubmit, user }) => {
+const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
     const {
         register,
         handleSubmit,
@@ -17,7 +17,6 @@ const UserModal = ({ isOpen, onClose, onSubmit, user }) => {
             last_name: "",
             email: "",
             phone: "",
-            password: "",
             department_id: "",
             role_id: "",
         }
@@ -30,7 +29,6 @@ const UserModal = ({ isOpen, onClose, onSubmit, user }) => {
                 last_name: user.last_name || "",
                 email: user.email || "",
                 phone: user.phone || "",
-                password: "",
                 department_id: user.department_id || "",
                 role_id: user.role_id || "",
             });
@@ -40,7 +38,6 @@ const UserModal = ({ isOpen, onClose, onSubmit, user }) => {
                 last_name: "",
                 email: "",
                 phone: "",
-                password: "",
                 department_id: "",
                 role_id: "",
             });
@@ -74,74 +71,124 @@ const UserModal = ({ isOpen, onClose, onSubmit, user }) => {
             <form
                 onSubmit={handleSubmit(submitHandler)}
                 className="flex flex-col gap-4">
-                <div>
-                    <InputWrap
-                        label="First Name"
-                        name="first_name"
-                        type="text"
-                        register={register}
-                        rules={{
-                            required: "First name is required",
-                            pattern: {
-                                value: /^[A-Za-z]+$/,
-                                message: "First name can only contain letters."
-                            }
-                        }}
-                        error={errors.first_name}
-                    />
+                <div className="flex gap-2 w-full">
+                    <div className='flex-1 min-w-0'>
+                        <InputWrap
+                            label="First Name"
+                            name="first_name"
+                            type="text"
+                            register={register}
+                            rules={{
+                                required: "First name is required",
+                                pattern: {
+                                    value: /^[A-Za-z]+$/,
+                                    message: "First name can only contain letters."
+                                }
+                            }}
+                            error={errors.first_name}
+                        />
+                    </div>
+                    <div className='flex-1 min-w-0'>
+                        <InputWrap
+                            label="Middle Name"
+                            name="middle_name"
+                            type="text"
+                            register={register}
+                            rules={{
+                                pattern: {
+                                    value: /^[A-Za-z]+$/,
+                                    message: "Middle name can only contain letters."
+                                }
+                            }}
+                            error={errors.first_name}
+                        />
+                    </div>
                 </div>
-                <div>
-                    <InputWrap
-                        label="Last Name"
-                        name="last_name"
-                        type="text"
-                        register={register}
-                        rules={{
-                            required: "Last name is required",
-                            pattern: {
-                                value: /^[A-Za-z]+$/,
-                                message: "Last name can only contain letters"
-                            }
-                        }}
-                        error={errors.last_name}
-                    />
+                <div className='flex gap-2 w-full'>
+                    <div className='flex-1 min-w-0'>
+                        <InputWrap
+                            label="Last Name"
+                            name="last_name"
+                            type="text"
+                            register={register}
+                            rules={{
+                                required: "Last name is required",
+                                pattern: {
+                                    value: /^[A-Za-z]+$/,
+                                    message: "Last name can only contain letters"
+                                }
+                            }}
+                            error={errors.last_name}
+                        />
+                    </div>
+                    <div className='flex-1 min-w-0'>
+                        <InputWrap
+                            label="DOB"
+                            name="start_date"
+                            type="date"
+                            register={register} />
+                    </div>
                 </div>
-                <div>
-                    <InputWrap
-                        label="Email"
-                        name="email"
-                        type="text"
-                        register={register}
-                        rules={{
-                            required: "Email is required",
-                            pattern: {
-                                value: /^\S+@\S+\.\S+$/,
-                                message: "Must contain valid email address"
-                            }
-                        }}
-                        error={errors.email}
-                    />
+
+                <div className='flex gap-2 w-full'>
+                    <div className='flex-1 min-w-0'>
+                        <InputWrap
+                            label="Email"
+                            name="email"
+                            type="text"
+                            register={register}
+                            rules={{
+                                required: "Email is required",
+                                pattern: {
+                                    value: /^\S+@\S+\.\S+$/,
+                                    message: "Must contain valid email address"
+                                }
+                            }}
+                            error={errors.email}
+                        />
+                    </div>
+                    <div className='flex-1 min-w-0'>
+                        <InputWrap
+                            label="Phone"
+                            name="phone"
+                            register={register}
+                            rules={{
+                                required: "Phone number is required",
+                                pattern: {
+                                    value: /^[0-9()+-\s]{10,20}$/,
+                                    message: "Must contain valid phone number"
+                                }
+                            }}
+                            error={errors.phone} />
+                    </div>
                 </div>
+
+                {!user
+                    // &&
+                    //     <InputWrap
+                    //         label="Password"
+                    //         name="password"
+                    //         type="password"
+                    //         register={register} />
+                }
                 <InputWrap
-                    label="Phone"
-                    name="phone"
+                    label="Department"
+                    name="department_id"
+                    type="select"
                     register={register}
-                    rules={{
-                        required: "Phone number is required",
-                        pattern: {
-                            value: /^[0-9()+-\s]{10,20}$/,
-                            message: "Must contain valid phone number"
-                        }
-                    }}
-                    error={errors.phone} />
-                {!user &&
-                    <InputWrap
-                        label="Password"
-                        name="password"
-                        type="password"
-                        register={register} />}
-                <InputWrap label="Department" name="department_id" register={register} />
-                <InputWrap label="Role" name="role_id" register={register} />
+                    options={departments.map((dep) => ({
+                        value: dep.id,
+                        label: dep.name
+                    }))} />
+                <InputWrap
+                    label="Role"
+                    name="role_id"
+                    type="select"
+                    register={register}
+                    options={roles.map(role => ({
+                        value: role.id,
+                        label: role.name
+                    }))} />
 
 
                 <div className="flex justify-end gap-2 mt-4">
