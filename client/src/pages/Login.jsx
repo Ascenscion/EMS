@@ -6,8 +6,11 @@ import InputWrap from "../components/InputWrap"
 import AddButton from "../components/AddButton"
 import { useNavigate } from "react-router-dom"
 import { loginUser } from "../services/loginService"
+import { useState } from "react"
 
 const Login = () => {
+    const [loginError, setLoginError] = useState("")
+
     const {
         register,
         handleSubmit,
@@ -18,6 +21,7 @@ const Login = () => {
 
     const submitHandler = async (formData) => {
         try {
+            setLoginError("")
             const data = await loginUser(formData)
             console.log("Login response: ", data);
             localStorage.setItem("user", JSON.stringify(data.user))
@@ -26,6 +30,9 @@ const Login = () => {
         } catch (error) {
             console.log("Login error", error);
             console.log("Backend response:", error.response?.data);
+            setLoginError(
+                error.response?.data?.message || "Login failed"
+            )
         }
     }
 
@@ -68,7 +75,11 @@ const Login = () => {
                         }}
                         error={errors.password}
                     />
-
+                    {loginError && (
+                        <div className="bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-lg text-sm">
+                            {loginError}
+                        </div>
+                    )}
                     <AddButton
                         type="submit"
                         variant="primary"

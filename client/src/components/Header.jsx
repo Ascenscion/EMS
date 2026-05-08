@@ -1,6 +1,8 @@
 import React from "react"
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+    const navigate = useNavigate()
     return (
         <header className="w-full border-b border-zinc-200 bg-white">
 
@@ -24,8 +26,10 @@ const Header = () => {
                 {/* Right section */}
                 <div className="flex items-center gap-6">
 
-                    <button className="text-sm text-zinc-500 hover:text-zinc-800 transition">
-                        Dashboard
+                    <button
+                        className="text-sm text-zinc-500 hover:text-zinc-800 transition"
+                        onClick={() => { localStorage.removeItem("user"); navigate("/login") }}>
+                        Logout
                     </button>
 
                     <button className="text-sm text-zinc-500 hover:text-zinc-800 transition">

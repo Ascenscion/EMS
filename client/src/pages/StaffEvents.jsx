@@ -14,6 +14,8 @@ const StaffEvents = () => {
     const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false)
     const [selectedEvent, setSelectedEvent] = useState(null)
 
+    const user = JSON.parse(localStorage.getItem("user"))
+
     const handleOpenApplyModal = (event) => {
         setSelectedEvent(event)
         setIsApplyModalOpen(true)
@@ -27,7 +29,7 @@ const StaffEvents = () => {
         try {
             const payload = {
                 event_id: selectedEvent.id,
-                user_id: 1,
+                user_id: user.id,
                 status: "pending"
             }
 
