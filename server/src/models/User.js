@@ -60,7 +60,11 @@ export default (sequelize, DataTypes) => {
                 type: DataTypes.STRING(255),
                 allowNull: false,
             },
-
+            is_active: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: true
+            },
             department_id: {
                 type: DataTypes.INTEGER,
                 allowNull: true,

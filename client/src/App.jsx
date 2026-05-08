@@ -7,6 +7,7 @@ import Users from './pages/Users'
 import Events from './pages/Events'
 import Applications from './pages/Applications'
 import Assignments from './pages/Assignments'
+import StaffEvents from './pages/StaffEvents'
 function App() {
   return (
     <Routes>
@@ -17,6 +18,7 @@ function App() {
         <Route path="/users" element={<Users />} />
         <Route path="/applications" element={<Applications />} />
         <Route path='/assignments' element={<Assignments />} />
+        <Route path='/staffevents' element={<StaffEvents />}></Route>
       </Route>
 
     </Routes>

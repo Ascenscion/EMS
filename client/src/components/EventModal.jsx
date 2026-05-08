@@ -113,9 +113,9 @@ const EventModal = ({ isOpen, onClose, event, onSubmit }) => {
                                 error={errors.max_users} />
                         </div>
                     </div>
-                    <hr />
-                    {/* work on Shift */}
-                    <hr />
+                    {/* <hr />
+                    work on Shift
+                    <hr /> */}
                     <div>
                         <InputWrap
                             placeHolder="Location name"

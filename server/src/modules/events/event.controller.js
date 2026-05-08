@@ -1,3 +1,4 @@
+import { where } from "sequelize";
 import db from "../../models/index.js"
 import { createLocation } from "../locations/location.controller.js";
 
@@ -84,6 +85,18 @@ export async function getEvent({ params }) {
         return { error: "Event not found" }
     }
     return event;
+}
+
+export async function getActiveEvents() {
+    const events = await Event.findAll({
+        where: {
+            status: "active"
+        },
+        include: [
+            { model: Location },
+        ]
+    })
+    return events;
 }
 
 export async function updateEvent({ params, body }) {

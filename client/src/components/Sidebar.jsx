@@ -82,6 +82,19 @@ const Sidebar = () => {
                         {!collapsed && "Applications"}
                     </NavLink>
 
+                    <NavLink
+                        to="/staffevents"
+                        className={({ isActive }) =>
+                            `flex items-center gap-3 px-4 py-2 rounded-lg transition
+              ${isActive
+                                ? "bg-zinc-900 text-white"
+                                : "text-zinc-600 hover:bg-zinc-100"}`
+                        }
+                    >
+                        <ClipboardList size={18} />
+                        {!collapsed && "StaffEvents"}
+                    </NavLink>
+
                 </nav>
 
             </div>

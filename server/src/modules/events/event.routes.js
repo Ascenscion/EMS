@@ -15,6 +15,8 @@ export const eventRoutes = new Elysia({
         params: eventIdParam
     })
 
+    .get("/active", controller.getActiveEvents)
+
     .post("/", controller.createEvent, {
         body: createEventSchema
     })
