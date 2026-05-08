@@ -10,9 +10,12 @@ export const createApplicationSchema = t.Object({
     user_id: t.Integer({
         minimum: 1
     }),
-    shift_id: t.Integer({
+    event_id: t.Integer({
         minimum: 1
     })
+    // shift_id: t.Integer({
+    //     minimum: 1
+    // })
 })
 
 export const updateApplicationSchema = t.Partial(createApplicationSchema);

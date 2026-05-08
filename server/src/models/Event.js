@@ -70,6 +70,11 @@ export default (sequelize, DataTypes) => {
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
         })
+        Event.hasMany(models.Application, {
+            foreignKey: "event_id",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
+        })
     }
     return Event;
 };

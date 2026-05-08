@@ -46,9 +46,17 @@ export default (sequelize, DataTypes) => {
             },
             shift_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false,
+                allowNull: true,
                 references: {
                     model: "Shifts",
+                    key: "id"
+                }
+            },
+            event_id: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                references: {
+                    model: "Events",
                     key: "id"
                 }
             }
@@ -83,6 +91,13 @@ export default (sequelize, DataTypes) => {
         Application.belongsTo(models.Shift, {
             foreignKey: "shift_id",
             as: "shift",
+            onDelete: "NO ACTION",
+            onUpdate: "NO ACTION"
+        })
+
+        Application.belongsTo(models.Event, {
+            foreignKey: "event_id",
+            as: "event",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
         })

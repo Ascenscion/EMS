@@ -13,7 +13,8 @@ export async function createApplication({ body }) {
         reviewed_at: null,
         reviewed_by: null,
         user_id: body.user_id,
-        shift_id: body.shift_id //This will probably give me an error later
+        shift_id: body.shift_id, //This will probably give me an error later
+        event_id: body.event_id
     })
 
     console.log(application);
