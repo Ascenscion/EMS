@@ -1,10 +1,16 @@
 import bcrypt from "bcrypt";
 import db from "../../models/index.js"
-import { where } from "sequelize";
+import crypto from "crypto";
+
 const { User } = db;
 
+function generateTempPassword() {
+    return crypto.randomBytes(8).toString("base64");
+}
+
 export async function createUser({ body }) {
-    const { password, email } = body;
+    console.log("HERE");
+    const { email } = body;
 
     //Check if user exists.
     const existingUser = await User.findOne({
@@ -15,6 +21,8 @@ export async function createUser({ body }) {
         return { error: "Email already registered" };
     }
 
+    const password = generateTempPassword();
+    console.log("PASSWORD", password);
     //Hash pw
     const password_hash = await bcrypt.hash(password, 10);
 

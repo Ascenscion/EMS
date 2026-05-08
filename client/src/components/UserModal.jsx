@@ -17,6 +17,9 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
             last_name: "",
             email: "",
             phone: "",
+            address: "",
+            emergency_contact: "",
+            emergency_phone: "",
             department_id: "",
             role_id: "",
         }
@@ -29,6 +32,9 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                 last_name: user.last_name || "",
                 email: user.email || "",
                 phone: user.phone || "",
+                address: "",
+                emergency_contact: "",
+                emergency_phone: "",
                 department_id: user.department_id || "",
                 role_id: user.role_id || "",
             });
@@ -38,6 +44,9 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                 last_name: "",
                 email: "",
                 phone: "",
+                address: "",
+                emergency_contact: "",
+                emergency_phone: "",
                 department_id: "",
                 role_id: "",
             });
@@ -162,7 +171,40 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                             error={errors.phone} />
                     </div>
                 </div>
-
+                <div className='flex-1 min-w-0'>
+                    <InputWrap
+                        label="Address"
+                        name="address"
+                        register={register}
+                        rules={{
+                            required: "Address is required",
+                        }}
+                        error={errors.address} />
+                </div>
+                <div className='flex gap-2 w-full'>
+                    <div className='flex-1 min-w-0'>
+                        <InputWrap
+                            label="Emergency Contact"
+                            name="emergency_contact"
+                            type="text"
+                            register={register}
+                        />
+                    </div>
+                    <div className='flex-1 min-w-0'>
+                        <InputWrap
+                            label="Emergency Phone"
+                            name="emergency_phone"
+                            register={register}
+                            rules={{
+                                required: "Phone number is required",
+                                pattern: {
+                                    value: /^[0-9()+-\s]{10,20}$/,
+                                    message: "Must contain valid phone number"
+                                }
+                            }}
+                        />
+                    </div>
+                </div>
                 {!user
                     // &&
                     //     <InputWrap
