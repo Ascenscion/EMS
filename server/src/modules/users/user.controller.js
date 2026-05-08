@@ -30,7 +30,7 @@ export async function createUser({ body }) {
     const user = await User.create({
         ...body,
         password_hash,
-        role_id: 2
+        role_id: body.role_id
     });
 
     //Remove pw from response

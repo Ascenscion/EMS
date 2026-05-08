@@ -10,8 +10,13 @@ import {
 } from "lucide-react"
 
 const Sidebar = () => {
-
+    const user = JSON.parse(localStorage.getItem("user"))
     const [collapsed, setCollapsed] = useState(false)
+    const navClass = ({ isActive }) =>
+        `flex items-center gap-3 px-4 py-2 rounded-lg transition
+    ${isActive
+            ? "bg-zinc-900 text-white"
+            : "text-zinc-600 hover:bg-zinc-100"}`
 
     return (
         <aside
@@ -32,69 +37,50 @@ const Sidebar = () => {
 
                     <NavLink
                         to="/"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-4 py-2 rounded-lg transition
-              ${isActive
-                                ? "bg-zinc-900 text-white"
-                                : "text-zinc-600 hover:bg-zinc-100"}`
-                        }
+                        className={navClass}
                     >
                         <LayoutDashboard size={18} />
                         {!collapsed && "Dashboard"}
                     </NavLink>
+                    {user?.role_id === 1 && (
+                        <>
+                            <NavLink
+                                to="/users"
+                                className={navClass}
+                            >
+                                <Users size={18} />
+                                {!collapsed && "Users"}
+                            </NavLink>
 
-                    <NavLink
-                        to="/users"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-4 py-2 rounded-lg transition
-              ${isActive
-                                ? "bg-zinc-900 text-white"
-                                : "text-zinc-600 hover:bg-zinc-100"}`
-                        }
-                    >
-                        <Users size={18} />
-                        {!collapsed && "Users"}
-                    </NavLink>
+                            <NavLink
+                                to="/events"
+                                className={navClass}
+                            >
+                                <Calendar size={18} />
+                                {!collapsed && "Events"}
+                            </NavLink>
 
-                    <NavLink
-                        to="/events"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-4 py-2 rounded-lg transition
-              ${isActive
-                                ? "bg-zinc-900 text-white"
-                                : "text-zinc-600 hover:bg-zinc-100"}`
-                        }
-                    >
-                        <Calendar size={18} />
-                        {!collapsed && "Events"}
-                    </NavLink>
+                            <NavLink
+                                to="/applications"
+                                className={navClass}
+                            >
+                                <ClipboardList size={18} />
+                                {!collapsed && "Applications"}
+                            </NavLink>
+                        </>
+                    )}
 
-                    <NavLink
-                        to="/applications"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-4 py-2 rounded-lg transition
-              ${isActive
-                                ? "bg-zinc-900 text-white"
-                                : "text-zinc-600 hover:bg-zinc-100"}`
-                        }
-                    >
-                        <ClipboardList size={18} />
-                        {!collapsed && "Applications"}
-                    </NavLink>
-
-                    <NavLink
-                        to="/staffevents"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-4 py-2 rounded-lg transition
-              ${isActive
-                                ? "bg-zinc-900 text-white"
-                                : "text-zinc-600 hover:bg-zinc-100"}`
-                        }
-                    >
-                        <ClipboardList size={18} />
-                        {!collapsed && "StaffEvents"}
-                    </NavLink>
-
+                    {user?.role_id === 2 && (
+                        <>
+                            <NavLink
+                                to="/staffevents"
+                                className={navClass}
+                            >
+                                <ClipboardList size={18} />
+                                {!collapsed && "StaffEvents"}
+                            </NavLink>
+                        </>
+                    )}
                 </nav>
 
             </div>

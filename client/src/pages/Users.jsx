@@ -26,6 +26,7 @@ const Users = () => {
             try {
                 const roleArray = await getRoles();
                 setRoles(roleArray)
+                console.log(roleArray[0].name);
                 const departmentArray = await getDepartments()
                 setDepartments(departmentArray)
             } catch (error) {
@@ -150,6 +151,8 @@ const Users = () => {
                 handleCloseModal();
                 handleOpenUpdatedUserConfirmationModal();
             } else {
+                console.log("FORM DATA:", formData)
+                console.log("PAYLOAD:", payload)
                 const newUser = await createUser(payload);
                 console.log("Created user response:", newUser);
                 setUsers(prev => [
