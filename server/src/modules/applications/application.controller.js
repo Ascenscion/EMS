@@ -37,7 +37,7 @@ export async function getApplication({ params }) {
 export async function getApplicationsByUser({ params }) {
     const application = await Application.findAll({
         where: {
-            user_id: params.id
+            user_id: Number(params.id)
         }
     })
     return application
