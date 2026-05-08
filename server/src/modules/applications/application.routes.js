@@ -10,9 +10,13 @@ export const applicationRoutes = new Elysia({
     prefix: "/applications"
 })
     .get("/", controller.getAllApplications)
+    .get("/user/:id", controller.getApplicationsByUser, {
+        params: applicationIdParam
+    })
     .get("/:id", controller.getApplication, {
         params: applicationIdParam
     })
+
     .post("/", controller.createApplication, {
         body: createApplicationSchema
     })

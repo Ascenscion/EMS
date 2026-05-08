@@ -40,8 +40,22 @@ function App() {
           </RoleRoute>
         }></Route>
       </Route>
-
     </Routes>
+
+    //INCASE OFF ACCIDENT UNCOMMENT BOTTOM
+    // <Routes>
+    //   <Route path="/login" element={<Login />} />
+
+    //   <Route path="/" element={<MainLayout />}>
+    //     <Route index element={<Dashboard />} />
+
+    //     <Route path="events" element={<Events />} />
+    //     <Route path="users" element={<Users />} />
+    //     <Route path="applications" element={<Applications />} />
+    //     <Route path="assignments" element={<Assignments />} />
+    //     <Route path="staffevents" element={<StaffEvents />} />
+    //   </Route>
+    // </Routes>
   )
 }
 

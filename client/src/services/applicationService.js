@@ -5,7 +5,7 @@ export const createApplication = async (payload) => {
     return response.data
 }
 
-export const getDepartments = async () => {
-    const response = await api.get("/departments")
-    return response.data;
+export const getApplicationbyUser = async (userId) => {
+    const response = await api.get("/applications")
+    return response.data
 }

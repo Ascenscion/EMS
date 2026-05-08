@@ -1,4 +1,4 @@
-import { DATE } from "sequelize";
+import { DATE, where } from "sequelize";
 import db from "../../models/index.js"
 
 const { Application } = db;
@@ -32,6 +32,15 @@ export async function getApplication({ params }) {
         return { error: "No application found" }
     }
     return application;
+}
+
+export async function getApplicationsByUser({ params }) {
+    const application = await Application.findAll({
+        where: {
+            user_id: params.id
+        }
+    })
+    return application
 }
 
 export async function updateApplication({ params, body }) {

@@ -4,7 +4,7 @@ import ReTable from '../components/ReTable'
 import { getActiveEvents } from '../services/eventService'
 import Modal from '../components/Modal'
 import AddButton from '../components/AddButton'
-import { createApplication } from '../services/applicationService'
+import { createApplication, getApplicationbyUser } from '../services/applicationService'
 
 
 const StaffEvents = () => {
@@ -13,6 +13,7 @@ const StaffEvents = () => {
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
     const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false)
     const [selectedEvent, setSelectedEvent] = useState(null)
+    const [applications, setApplications] = useState([])
 
     const user = JSON.parse(localStorage.getItem("user"))
 
@@ -49,6 +50,13 @@ const StaffEvents = () => {
     const handleCloseConfirmationModal = () => {
         setIsConfirmationModalOpen(false)
     }
+
+    const hasApplied = (eventId) => {
+        return applications.some(
+            (application) => application.event_id === eventId
+        )
+    }
+
     useEffect(() => {
         const fetchEvents = async () => {
             try {
@@ -56,6 +64,11 @@ const StaffEvents = () => {
                 setEvents(data)
                 console.log("Fetched Events: ", data);
                 console.log("First Location:", data[0]?.Location?.name);
+                const userApplications = await getApplicationbyUser(user.id)
+                console.log("Logged user:", user)
+                console.log("User applications:", userApplications)
+                console.log("Active events:", data)
+                setApplications(userApplications)
             } catch (error) {
                 console.log("Error fetching events", error);
             } finally {
@@ -87,11 +100,17 @@ const StaffEvents = () => {
             render: (row) => (
 
                 <div className='flex gap-2'>
-                    {/* {console.log("ROW", row)} */}
                     <button
+                        disabled={hasApplied(row.id)}
                         onClick={() => handleOpenApplyModal(row)}
-                        className='px-3 py-1 text-sm bg-zinc-900 text-white rounded-md hover:bg-zinc-800'>
-                        Apply
+                        className={`px-3 py-1 text-sm rounded-md
+        ${hasApplied(row.id)
+                                ? "bg-zinc-300 text-zinc-500 cursor-not-allowed"
+                                : "bg-zinc-900 text-white hover:bg-zinc-800"
+                            }`}
+                    >
+                        {hasApplied(row.id) ? "Applied" : "Apply"}
+
                     </button>
                     <button
                         //onClick={}
