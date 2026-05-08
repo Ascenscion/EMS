@@ -4,6 +4,8 @@ import React from "react"
 import { useForm } from "react-hook-form"
 import InputWrap from "../components/InputWrap"
 import AddButton from "../components/AddButton"
+import { useNavigate } from "react-router-dom"
+import { loginUser } from "../services/loginService"
 
 const Login = () => {
     const {
@@ -12,8 +14,19 @@ const Login = () => {
         formState: { errors }
     } = useForm()
 
-    const submitHandler = (formData) => {
-        console.log("Login data:", formData)
+    const navigate = useNavigate()
+
+    const submitHandler = async (formData) => {
+        try {
+            const data = await loginUser(formData)
+            console.log("Login response: ", data);
+            localStorage.setItem("user", JSON.stringify(data.user))
+            navigate("/")
+            console.log("Login data:", formData)
+        } catch (error) {
+            console.log("Login error", error);
+            console.log("Backend response:", error.response?.data);
+        }
     }
 
     return (

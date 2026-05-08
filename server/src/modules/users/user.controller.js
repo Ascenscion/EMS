@@ -5,7 +5,7 @@ import crypto from "crypto";
 const { User } = db;
 
 function generateTempPassword() {
-    return crypto.randomBytes(8).toString("base64");
+    return crypto.randomBytes(8).toString("hex");
 }
 
 export async function createUser({ body }) {
