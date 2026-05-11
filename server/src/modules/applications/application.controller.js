@@ -64,6 +64,11 @@ export async function getApplications() {
                     as: "event",
                     attributes: ["id", "name"]
                 },
+                {
+                    model: User,
+                    as: "reviewer",
+                    attributes: ["id", "first_name", "last_name"]
+                }
             ],
             order: [["applied_at", "DESC"]],
         });
