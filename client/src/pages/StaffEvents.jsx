@@ -35,6 +35,8 @@ const StaffEvents = () => {
             }
 
             await createApplication(payload)
+            const updatedApplications = await getApplicationbyUser(user.id);
+            setApplications(updatedApplications)
             handleCloseApplyModal()
             handleOpenConfirmationModal()
         } catch (error) {
@@ -52,10 +54,13 @@ const StaffEvents = () => {
     }
 
     const hasApplied = (eventId) => {
-        return applications.some(
-            (application) => application.event_id === eventId
-        )
-    }
+        console.log("Checking event:", eventId);
+        console.log("Applications:", applications);
+        return applications.some((app) =>
+            app.user_id === user.id &&
+            app.event_id === eventId
+        );
+    };
 
     useEffect(() => {
         const fetchEvents = async () => {

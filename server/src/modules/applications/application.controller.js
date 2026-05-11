@@ -21,9 +21,16 @@ export async function createApplication({ body }) {
     return application;
 }
 
-export async function getAllApplications() {
-    const applications = await Application.findAll();
-    return applications;
+export async function getApplications() {
+    try {
+
+    } catch (error) {
+
+    }
+}
+
+export async function updateApplicationStatus() {
+
 }
 
 export async function getApplication({ params }) {

@@ -20,22 +20,22 @@ function App() {
         </ProtectedRoutes>}>
 
         <Route index element={<Dashboard />} />
-
+        {/* MASTER ACCOUNT ID 3. REMOVE LATER SAME AT SIDEBAR COMPONENT */}
         <Route path="/events" element={
-          <RoleRoute allowedRoles={[1]}>
+          <RoleRoute allowedRoles={[1, 3]}>
             <Events />
           </RoleRoute>
         } />
 
         <Route path="/users" element={
-          <RoleRoute allowedRoles={[1]}>
+          <RoleRoute allowedRoles={[1, 3]}>
             <Users />
           </RoleRoute>
         } />
         <Route path="/applications" element={<Applications />} />
         <Route path='/assignments' element={<Assignments />} />
         <Route path='/staffevents' element={
-          <RoleRoute allowedRoles={[2]}>
+          <RoleRoute allowedRoles={[2, 3]}>
             <StaffEvents />
           </RoleRoute>
         }></Route>

@@ -9,7 +9,7 @@ import {
 export const applicationRoutes = new Elysia({
     prefix: "/applications"
 })
-    .get("/", controller.getAllApplications)
+    .get("/", controller.getApplications)
     .get("/user/:id", controller.getApplicationsByUser, {
         params: applicationIdParam
     })
@@ -24,6 +24,7 @@ export const applicationRoutes = new Elysia({
         params: applicationIdParam,
         body: updateApplicationSchema
     })
+    .patch("/applications/:id/status", controller.updateApplicationStatus)
     .delete("/:id", controller.deleteApplication, {
         params: applicationIdParam
     })

@@ -25,10 +25,13 @@ export const createEventSchema = t.Object({
     created_by: t.Integer({
         minimum: 1
     }),
-    location_id: t.Integer({
-        minimum: 1
-    }),
 
+    location_name: t.String(),
+    address_line_1: t.String(),
+    address_line_2: t.Optional(t.String()),
+    city: t.String(),
+    state: t.String(),
+    zip_code: t.String(),
 })
 
 export const updateEventSchema = t.Partial(createEventSchema);

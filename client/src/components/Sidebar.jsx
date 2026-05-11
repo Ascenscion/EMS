@@ -42,7 +42,8 @@ const Sidebar = () => {
                         <LayoutDashboard size={18} />
                         {!collapsed && "Dashboard"}
                     </NavLink>
-                    {user?.role_id === 1 && (
+                    {/* MASTER ACCOUNT (ID 3) FOR FULL ACCESS TO ALL ROUTES. REMOVE LATER ON */}
+                    {user?.role_id === 1 || 3 && (
                         <>
                             <NavLink
                                 to="/users"
@@ -70,7 +71,7 @@ const Sidebar = () => {
                         </>
                     )}
 
-                    {user?.role_id === 2 && (
+                    {user?.role_id === 2 || 3 && (
                         <>
                             <NavLink
                                 to="/staffevents"
