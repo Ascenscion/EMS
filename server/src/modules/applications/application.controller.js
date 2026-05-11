@@ -123,7 +123,19 @@ export async function getApplicationsByUser({ params }) {
     const application = await Application.findAll({
         where: {
             user_id: Number(params.id)
-        }
+        },
+        include: [
+            {
+                model: Event,
+                as: "event",
+                attributes: ["id", "name"]
+            },
+            {
+                model: User,
+                as: "reviewer",
+                attributes: ["id", "first_name", "last_name"]
+            }
+        ]
     })
     return application
 }

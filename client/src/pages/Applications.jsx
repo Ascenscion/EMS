@@ -94,6 +94,10 @@ const Applications = () => {
 
     const pendingColumns = [
         {
+            header: "ID",
+            render: (row) => row.user?.id || "No ID",
+        },
+        {
             header: "Applicant",
             render: (row) =>
                 `${row.user?.first_name || ""} ${row.user?.last_name || ""}`,
@@ -128,7 +132,11 @@ const Applications = () => {
         },
     ];
 
-    const approvedColumns = [
+    const reviewedColumns = [
+        {
+            header: "ID",
+            render: (row) => row.user?.id || "No ID",
+        },
         {
             header: "Applicant",
             render: (row) =>
@@ -176,7 +184,7 @@ const Applications = () => {
                 ))}
             </div>
             <ReTable
-                columns={activeTab === "pending" ? pendingColumns : approvedColumns}
+                columns={activeTab === "pending" ? pendingColumns : reviewedColumns}
                 data={filteredApplications}
             />
             <Modal

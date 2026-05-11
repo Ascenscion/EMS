@@ -10,6 +10,8 @@ import Assignments from './pages/Assignments'
 import StaffEvents from './pages/StaffEvents'
 import ProtectedRoutes from './routes/ProtectedRoutes'
 import RoleRoute from './routes/RoleRoute'
+import MyApplications from './pages/MyApplications'
+
 function App() {
   return (
     <Routes>
@@ -39,6 +41,14 @@ function App() {
             <StaffEvents />
           </RoleRoute>
         }></Route>
+        <Route
+          path="/myapplications"
+          element={
+            <RoleRoute allowedRoles={[2, 3]}>
+              <MyApplications />
+            </RoleRoute>
+          }
+        />
       </Route>
     </Routes>
 
