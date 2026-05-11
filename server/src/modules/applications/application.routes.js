@@ -13,18 +13,15 @@ export const applicationRoutes = new Elysia({
     .get("/user/:id", controller.getApplicationsByUser, {
         params: applicationIdParam
     })
-    .get("/:id", controller.getApplication, {
-        params: applicationIdParam
-    })
-
+    .patch("/:id/status", controller.updateApplicationStatus)
     .post("/", controller.createApplication, {
         body: createApplicationSchema
+    })
+
+    .delete("/:id", controller.deleteApplication, {
+        params: applicationIdParam
     })
     .patch("/:id", controller.updateApplication, {
         params: applicationIdParam,
         body: updateApplicationSchema
-    })
-    .patch("/applications/:id/status", controller.updateApplicationStatus)
-    .delete("/:id", controller.deleteApplication, {
-        params: applicationIdParam
     })

@@ -67,7 +67,7 @@ export default (sequelize, DataTypes) => {
             indexes: [
                 {
                     unique: true,
-                    fields: ["user_id", "shift_id"]
+                    fields: ["user_id", "event_id"]
                 }
             ]
         }
@@ -76,7 +76,7 @@ export default (sequelize, DataTypes) => {
     Application.associate = (models) => {
         Application.belongsTo(models.User, {
             foreignKey: "user_id",
-            as: "applicant",
+            as: "user", //"applicant"
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
         })

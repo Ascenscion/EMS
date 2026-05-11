@@ -33,7 +33,7 @@ const StaffEvents = () => {
                 user_id: user.id,
                 status: "pending"
             }
-
+            console.log("Application payload:", payload);
             await createApplication(payload)
             const updatedApplications = await getApplicationbyUser(user.id);
             setApplications(updatedApplications)
