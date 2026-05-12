@@ -20,6 +20,7 @@ const Users = () => {
     const [openDeleteFailedModal, setOpenDeleteFailedModal] = useState(false);
     const [roles, setRoles] = useState([])
     const [departments, setDepartments] = useState([])
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -69,9 +70,10 @@ const Users = () => {
                     </button>
 
                     <button
+                        disabled={isDeleting}
                         onClick={() => handleOpenDeleteModal(row)}
                         className='px-3 py-1 text-sm border border-zinc-300 rounded-md hover:bg-zinc-100'>
-                        Delete
+                        {isDeleting ? "Deleting..." : "Delete"}
                     </button>
                 </div >
             )
@@ -173,24 +175,36 @@ const Users = () => {
     }
 
     const handleDelete = async (user) => {
-        console.log("DELETE BUTTON CLICKED", user);
+        //AUTH: once implemented add validation so user cant delete himself.
+        if (!user || !user.id) {
+            return;
+        }
+        // UNCOMMENT WHEN AUTH IMPLEMENTED
+        // if (loggedInUser.id === user.id) {
+        //     setDeleteErrorMessage("You cannot delete own account.");
+        //     handleOpenDeleteFailedModal();
+        //     return;
+        // }
         try {
-            const result = await deleteUser(user.id);
-            //console.log("Delete success:", result);
+            setIsDeleting(true);
+
+            await deleteUser(user.id);
             setUsers((prev) => prev.filter((u) => u.id !== user.id));
+            setSelectedUser(null);
+
             handleCloseDeleteModal();
             handleOpenConfirmationModal();
         } catch (error) {
             const backendError = error.response?.data;
 
             const message =
-                backendError?.message ||
-                backendError ||
-                "Failed to delete user.";
+                error.response?.data?.message || "Failed to delete user.";
 
             setDeleteErrorMessage(message);
             handleCloseDeleteModal()
             handleOpenDeleteFailedModal();
+        } finally {
+            setIsDeleting(false)
         }
     }
 

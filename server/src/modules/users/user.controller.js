@@ -2,8 +2,9 @@ import bcrypt from "bcrypt";
 import db from "../../models/index.js"
 import crypto from "crypto";
 import { error } from "console";
+import { where } from "sequelize";
 
-const { User, Role, Department } = db;
+const { User, Role, Department, Application } = db;
 
 function generateTempPassword() {
     return crypto.randomBytes(8).toString("hex");
@@ -278,44 +279,79 @@ export async function updateUser({ params, body, set }) {
 }
 
 export async function deleteUser({ params, set }) {
+    // ONCE AUTH ADDED ADD VALIDATION USER CAN DELETE OWN ACCOUNT OR ADMIN ACCOUNTS.
     try {
-        const deleted = await User.destroy({
-            where: { id: params.id }
-        });
+        const userId = Number(params.id);
 
-        if (!deleted) {
+        if (!userId || Number.isNaN(userId)) {
+            set.status = 400;
+            return { error: "Invalid user ID" }
+        }
+
+        // const deleted = await User.destroy({
+        //     where: { id: params.id }
+        // });
+
+        const user = await User.findByPk(userId);
+
+        if (!user) {
             set.status = 404;
             return {
                 type: "not_found",
                 message: "User not found,"
             }
         }
-        return {
-            type: "success",
-            message: "User deleted successfully"
-        }
-    } catch (error) {
-        console.error("Delete user error: ", error);
 
-        const errorMessage =
-            error?.original?.message ||
-            error?.parent?.message ||
-            error?.message ||
-            String(error);
+        const existingApplications = await Application.findOne({
+            where: { user_id: userId }
+        })
 
-        if (errorMessage.includes("REFERENCE constraint") ||
-            errorMessage.includes("conflicted with the REFERENCE constraint")) {
+        if (existingApplications) {
             set.status = 409;
             return {
-                type: "reference_constraint",
-                message: "This user cannot be deleted because they have related records"
+                error: "Cannot delete user because they have existing applications",
             }
         }
 
+        await user.destroy();
+
+        return {
+            type: "success",
+            message: "User deleted successfully",
+            id: userId
+        }
+    } catch (error) {
+        // console.error("Delete user error: ", error);
+
+        // const errorMessage =
+        //     error?.original?.message ||
+        //     error?.parent?.message ||
+        //     error?.message ||
+        //     String(error);
+
+        // if (errorMessage.includes("REFERENCE constraint") ||
+        //     errorMessage.includes("conflicted with the REFERENCE constraint")) {
+        //     set.status = 409;
+        //     return {
+        //         type: "reference_constraint",
+        //         message: "This user cannot be deleted because they have related records"
+        //     }
+        // }
+        const backendError = error.response?.data;
+
+        const message =
+            backendError?.message ||
+            backendError?.error ||
+            "Failed to delete user.";
+
+        setDeleteErrorMessage(message);
+        handleCloseDeleteModal();
+        handleOpenDeleteFailedModal();
+
         set.status = 500
         return {
-            type: "server_error",
-            message: "Something went wrong while deleting the user."
+            type: "conflict",
+            message: "Cannot delete user because they have existing applications."
         }
     }
 }

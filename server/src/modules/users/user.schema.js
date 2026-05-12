@@ -2,7 +2,7 @@ import { t } from "elysia";
 
 export const createUserSchema = t.Object({
     first_name: t.String({
-        pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s'-]*$",
+        pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s'-]+$",
         minLength: 2,
         maxLength: 50
     }),
@@ -13,7 +13,7 @@ export const createUserSchema = t.Object({
         }),
     ),
     last_name: t.String({
-        pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s'-]*$",
+        pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s'-]+$",
         minLength: 2,
         maxLength: 50
     }),
