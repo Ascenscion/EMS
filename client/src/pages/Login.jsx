@@ -59,7 +59,11 @@ const Login = () => {
                         placeHolder="Enter your email"
                         register={register}
                         rules={{
-                            required: "Email is required"
+                            required: "Email is required",
+                            pattern: {
+                                value: /^\S+@\S+\.\S+$/,
+                                message: "Enter a valid email",
+                            }
                         }}
                         error={errors.email}
                     />
