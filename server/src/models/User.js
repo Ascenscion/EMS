@@ -90,12 +90,14 @@ export default (sequelize, DataTypes) => {
     User.associate = (models) => {
         User.belongsTo(models.Department, {
             foreignKey: "department_id",
+            as: "department",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
         });
 
         User.belongsTo(models.Role, {
             foreignKey: "role_id",
+            as: "role",
             onDelete: "NO ACTION",
             onUpdate: "NO ACTION"
         })

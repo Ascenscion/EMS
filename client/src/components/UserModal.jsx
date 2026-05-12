@@ -5,7 +5,7 @@ import InputWrap from "./InputWrap"
 import { useForm } from "react-hook-form"
 
 
-const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
+const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments, isSaving }) => {
     const {
         register,
         handleSubmit,
@@ -320,8 +320,10 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                         onClick={onClose}>
                         Cancel
                     </AddButton>
-                    <AddButton type="submit">
-                        {user ? "Update" : "Save"}
+                    <AddButton
+                        type="submit"
+                        disabled={isSaving}>
+                        {isSaving ? "Saving..." : user ? "Update" : "Save"}
                     </AddButton>
                 </div>
             </form>

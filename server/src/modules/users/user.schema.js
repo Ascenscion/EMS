@@ -61,7 +61,9 @@ export const createUserSchema = t.Object({
 export const updateUserSchema = t.Partial(createUserSchema);
 
 export const userIdParam = t.Object({
-    id: t.Number()
+    id: t.Numeric({
+        minimum: 1,
+    })
 })
 
 /* Pendiente */

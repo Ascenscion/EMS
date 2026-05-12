@@ -1,6 +1,6 @@
 import React from "react"
 
-const AddButton = ({ children, onClick, type = "button", variant = "primary", className = "" }) => {
+const AddButton = ({ children, onClick, type = "button", variant = "primary", className = "", }) => {
 
     const base =
         "px-4 py-2 rounded-lg text-sm font-medium transition duration-200"

@@ -2,7 +2,8 @@ import bcrypt from "bcrypt";
 import db from "../../models/index.js"
 import crypto from "crypto";
 import { error } from "console";
-import { where } from "sequelize";
+import { Model, where } from "sequelize";
+import { type } from "os";
 
 const { User, Role, Department, Application } = db;
 
@@ -21,7 +22,10 @@ export async function createUser({ body, set }) {
 
         if (existingUser) {
             set.status = 409;
-            return { error: "Email already registered" };
+            return {
+                type: "validation_error",
+                message: "Email already registered"
+            };
         }
 
         //DOB Validation
@@ -31,7 +35,8 @@ export async function createUser({ body, set }) {
         if (dob > today) {
             set.status = 400;
             return {
-                error: "Date of birth cannot be in the future",
+                type: "validation_error",
+                message: "Date of birth cannot be in the future",
             };
         }
 
@@ -48,14 +53,16 @@ export async function createUser({ body, set }) {
         if (age < 18) {
             set.status = 400;
             return {
-                error: "User must be at least 18 years old",
+                type: "validation_error",
+                message: "User must be at least 18 years old",
             };
         }
 
         if (age > 100) {
             set.status = 400;
             return {
-                error: "Please enter a valid date of birth",
+                type: "validation_error",
+                message: "Please enter a valid date of birth",
             };
         }
 
@@ -63,13 +70,19 @@ export async function createUser({ body, set }) {
         const role = await Role.findByPk(body.role_id);
         if (!role) {
             set.status = 400;
-            return { error: "Invalid role selected" };
+            return {
+                type: "validation_error",
+                message: "Invalid role selected"
+            };
         }
 
         const department = await Department.findByPk(body.department_id);
         if (!department) {
             set.status = 400;
-            return { error: "Invalid department selected" };
+            return {
+                type: "validation_error",
+                message: "Invalid department selected"
+            };
         }
 
         const password = generateTempPassword();
@@ -99,7 +112,8 @@ export async function createUser({ body, set }) {
         console.error("Error creating user:", error);
         set.status = 500;
         return {
-            error: "Could not create user",
+            type: "server_error",
+            message: "Could not create user",
             details: error.message,
         };
     }
@@ -108,12 +122,32 @@ export async function createUser({ body, set }) {
 export async function getAllUsers() {
     try {
         const users = await User.findAll({
-            attributes: { exclude: ["password_hash"] }
+            attributes: { exclude: ["password_hash"] },
+            include: [
+                {
+                    model: Role,
+                    as: "role",
+                    attributes: ["id", "name"],
+                },
+                {
+                    model: Department,
+                    as: "department",
+                    attributes: ["id", "name"]
+                }
+            ],
+            order: [["id", "ASC"]],
         });
-        console.log(users);
+        console.log("USERS:", users);
         return users;
     } catch (error) {
+        console.error("Error fetching users:", error);
 
+        set.status = 500;
+        return {
+            type: "server_error",
+            message: "Could not fetch users",
+            details: error.message,
+        };
     }
 }
 
@@ -130,7 +164,14 @@ export async function getUser({ params }) {
         console.log("USER DOB: ", user);
         return user;
     } catch (error) {
+        console.error("Error fetching user:", error);
 
+        set.status = 500;
+        return {
+            type: "server_error",
+            message: "Could not fetch user",
+            details: error.message,
+        };
 
     }
 }
@@ -140,14 +181,20 @@ export async function updateUser({ params, body, set }) {
         const userId = Number(params.id);
         if (!userId || Number.isNaN(userId)) {
             set.status = 400;
-            return { error: "Invalid user ID" }
+            return {
+                type: "validation_error",
+                error: "Invalid user ID"
+            }
         }
 
         const user = await User.findByPk(userId);
 
         if (!user) {
             set.status = 404;
-            return { error: "User not found" };
+            return {
+                type: "validation_error",
+                error: "User not found"
+            };
         }
 
         delete body.id;
@@ -160,7 +207,10 @@ export async function updateUser({ params, body, set }) {
         for (const field of requiredFields) {
             if (field in body && body[field].trim() === "") {
                 set.status = 400;
-                return { error: `${field} cannot be empty` };
+                return {
+                    type: "validation_error",
+                    message: `${field} cannot be empty`
+                };
             }
         }
 
@@ -183,7 +233,10 @@ export async function updateUser({ params, body, set }) {
 
             if (existingUser) {
                 set.status = 409;
-                return { error: "Email already registered" };
+                return {
+                    type: "validation_error",
+                    message: "Email already registered"
+                };
             }
         }
 
@@ -194,12 +247,18 @@ export async function updateUser({ params, body, set }) {
 
             if (Number.isNaN(dob.getTime())) {
                 set.status = 400;
-                return { error: "Invalid date of birth" };
+                return {
+                    type: "validation_error",
+                    message: "Invalid date of birth"
+                };
             }
 
             if (dob > today) {
                 set.status = 400;
-                return { error: "Date of birth cannot be in the future" };
+                return {
+                    type: "validation_error",
+                    message: "Date of birth cannot be in the future"
+                };
             }
 
             let age = today.getFullYear() - dob.getFullYear();
@@ -214,12 +273,18 @@ export async function updateUser({ params, body, set }) {
 
             if (age < 18) {
                 set.status = 400;
-                return { error: "User must be at least 18 years old" };
+                return {
+                    type: "validation_error",
+                    message: "User must be at least 18 years old"
+                };
             }
 
             if (age > 100) {
                 set.status = 400;
-                return { error: "Please enter a valid date of birth" };
+                return {
+                    type: "validation_error",
+                    message: "Please enter a valid date of birth"
+                };
             }
         }
 
@@ -229,7 +294,10 @@ export async function updateUser({ params, body, set }) {
 
             if (!role) {
                 set.status = 400;
-                return { error: "Invalid role selected" };
+                return {
+                    type: "validation_error",
+                    message: "Invalid role selected"
+                };
             }
         }
 
@@ -239,7 +307,10 @@ export async function updateUser({ params, body, set }) {
 
             if (!department) {
                 set.status = 400;
-                return { error: "Invalid department selected" };
+                return {
+                    type: "validation_error",
+                    message: "Invalid department selected"
+                };
             }
         }
 
@@ -272,7 +343,8 @@ export async function updateUser({ params, body, set }) {
 
         set.status = 500;
         return {
-            error: "Could not update user",
+            type: "server_error",
+            message: "Could not update user",
             details: error.message,
         };
     }
@@ -285,12 +357,11 @@ export async function deleteUser({ params, set }) {
 
         if (!userId || Number.isNaN(userId)) {
             set.status = 400;
-            return { error: "Invalid user ID" }
+            return {
+                type: "validation_error",
+                message: "Invalid user ID"
+            }
         }
-
-        // const deleted = await User.destroy({
-        //     where: { id: params.id }
-        // });
 
         const user = await User.findByPk(userId);
 
@@ -309,7 +380,8 @@ export async function deleteUser({ params, set }) {
         if (existingApplications) {
             set.status = 409;
             return {
-                error: "Cannot delete user because they have existing applications",
+                type: "FK_constraint_error",
+                message: "Cannot delete user because they have existing applications",
             }
         }
 
@@ -321,22 +393,6 @@ export async function deleteUser({ params, set }) {
             id: userId
         }
     } catch (error) {
-        // console.error("Delete user error: ", error);
-
-        // const errorMessage =
-        //     error?.original?.message ||
-        //     error?.parent?.message ||
-        //     error?.message ||
-        //     String(error);
-
-        // if (errorMessage.includes("REFERENCE constraint") ||
-        //     errorMessage.includes("conflicted with the REFERENCE constraint")) {
-        //     set.status = 409;
-        //     return {
-        //         type: "reference_constraint",
-        //         message: "This user cannot be deleted because they have related records"
-        //     }
-        // }
         const backendError = error.response?.data;
 
         const message =
