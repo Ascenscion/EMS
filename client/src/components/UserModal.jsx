@@ -29,7 +29,9 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
     })
 
     useEffect(() => {
+
         if (user) {
+            console.log("DOB ", user.dob);
             reset({
                 first_name: user.first_name || "",
                 middle_name: user.middle_name || "",
@@ -37,9 +39,9 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                 dob: user.dob || "",
                 email: user.email || "",
                 phone: user.phone || "",
-                address: "",
-                emergency_contact: "",
-                emergency_phone: "",
+                address: user.address || "",
+                emergency_contact: user.emergency_contact || "",
+                emergency_phone: user.emergency_phone || "",
                 department_id: user.department_id || "",
                 role_id: user.role_id || "",
             });

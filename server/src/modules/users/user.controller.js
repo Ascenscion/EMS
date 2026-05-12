@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import db from "../../models/index.js"
 import crypto from "crypto";
+import { error } from "console";
 
 const { User, Role, Department } = db;
 
@@ -104,42 +105,176 @@ export async function createUser({ body, set }) {
 }
 
 export async function getAllUsers() {
-    const users = await User.findAll({
-        attributes: { exclude: ["password_hash"] }
-    });
-    return users;
+    try {
+        const users = await User.findAll({
+            attributes: { exclude: ["password_hash"] }
+        });
+        console.log(users);
+        return users;
+    } catch (error) {
+
+    }
 }
 
 export async function getUser({ params }) {
-    const user = await User.findByPk(params.id, {
-        attributes: { exclude: ["password_hash"] }
-    });
-    console.log("USER", user);
-    console.log("PARAMS", params.id);
-    if (!user) {
-        return { error: "User not found." }
+    try {
+        const user = await User.findByPk(params.id, {
+            attributes: { exclude: ["password_hash"] }
+        });
+        console.log("USER", user);
+        console.log("PARAMS", params.id);
+        if (!user) {
+            return { error: "User not found." }
+        }
+        console.log("USER DOB: ", user);
+        return user;
+    } catch (error) {
+
+
     }
-    return user;
 }
 
 export async function updateUser({ params, body, set }) {
-    const user = await User.findByPk(params.id);
-    if (!user) {
-        return { error: "User not found" };
-    }
-    Object.keys(body).forEach(key => {
-        if (body[key] === "") delete body[key];
-    });
+    try {
+        const userId = Number(params.id);
+        if (!userId || Number.isNaN(userId)) {
+            set.status = 400;
+            return { error: "Invalid user ID" }
+        }
 
-    if (body.password) {
-        body.password_hash = await bcrypt.hash(body.password, 10)
-        delete body.password;
-    }
+        const user = await User.findByPk(userId);
 
-    await user.update(body);
-    const updatedUser = user.toJSON();
-    delete updatedUser.password_hash;
-    return updatedUser;
+        if (!user) {
+            set.status = 404;
+            return { error: "User not found" };
+        }
+
+        delete body.id;
+        delete body.password_hash;
+        delete body.created_at;
+        delete body.updated_at;
+
+        const requiredFields = ["first_name", "last_name", "email", "phone", "address"];
+
+        for (const field of requiredFields) {
+            if (field in body && body[field].trim() === "") {
+                set.status = 400;
+                return { error: `${field} cannot be empty` };
+            }
+        }
+
+        //Remove empty strings
+        Object.keys(body).forEach(key => {
+            if (body[key] === "") delete body[key];
+        });
+
+
+        //email -> lowercase
+        if (body.email) {
+            body.email = body.email.trim().toLowerCase();
+        }
+
+        // Email duplicate check only if email changed
+        if (body.email && body.email !== user.email) {
+            const existingUser = await User.findOne({
+                where: { email: body.email },
+            });
+
+            if (existingUser) {
+                set.status = 409;
+                return { error: "Email already registered" };
+            }
+        }
+
+        // DOB validation only if DOB was sent
+        if (body.dob) {
+            const dob = new Date(body.dob);
+            const today = new Date();
+
+            if (Number.isNaN(dob.getTime())) {
+                set.status = 400;
+                return { error: "Invalid date of birth" };
+            }
+
+            if (dob > today) {
+                set.status = 400;
+                return { error: "Date of birth cannot be in the future" };
+            }
+
+            let age = today.getFullYear() - dob.getFullYear();
+            const monthDiff = today.getMonth() - dob.getMonth();
+
+            if (
+                monthDiff < 0 ||
+                (monthDiff === 0 && today.getDate() < dob.getDate())
+            ) {
+                age--;
+            }
+
+            if (age < 18) {
+                set.status = 400;
+                return { error: "User must be at least 18 years old" };
+            }
+
+            if (age > 100) {
+                set.status = 400;
+                return { error: "Please enter a valid date of birth" };
+            }
+        }
+
+        // Role validation only if role_id was sent
+        if (body.role_id) {
+            const role = await Role.findByPk(body.role_id);
+
+            if (!role) {
+                set.status = 400;
+                return { error: "Invalid role selected" };
+            }
+        }
+
+        // Department validation only if department_id was sent
+        if (body.department_id) {
+            const department = await Department.findByPk(body.department_id);
+
+            if (!department) {
+                set.status = 400;
+                return { error: "Invalid department selected" };
+            }
+        }
+
+        if (body.password) {
+            body.password_hash = await bcrypt.hash(body.password, 10)
+            delete body.password;
+        }
+
+        const payload = {
+            ...body,
+            first_name: body.first_name?.trim(),
+            middle_name: body.middle_name?.trim() || null,
+            last_name: body.last_name?.trim(),
+            email: body.email?.trim().toLowerCase(),
+            address: body.address?.trim(),
+            emergency_contact: body.emergency_contact?.trim() || null,
+            emergency_phone: body.emergency_phone?.trim() || null,
+            role_id: body.role_id ? Number(body.role_id) : user.role_id,
+            department_id: body.department_id
+                ? Number(body.department_id)
+                : user.department_id,
+        };
+
+        await user.update(payload);
+        const updatedUser = user.toJSON();
+        delete updatedUser.password_hash;
+        return updatedUser;
+    } catch (error) {
+        console.error("Error updating user:", error);
+
+        set.status = 500;
+        return {
+            error: "Could not update user",
+            details: error.message,
+        };
+    }
 }
 
 export async function deleteUser({ params, set }) {

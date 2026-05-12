@@ -2,18 +2,18 @@ import { t } from "elysia";
 
 export const createUserSchema = t.Object({
     first_name: t.String({
-        pattern: "^[A-Za-z]+$",
+        pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s'-]*$",
         minLength: 2,
         maxLength: 50
     }),
     middle_name: t.Optional(
         t.String({
-            pattern: "^[A-Za-z]+$",
+            pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s'-]*$",
             default: "",
         }),
     ),
     last_name: t.String({
-        pattern: "^[A-Za-z]+$",
+        pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s'-]*$",
         minLength: 2,
         maxLength: 50
     }),
@@ -37,7 +37,7 @@ export const createUserSchema = t.Object({
     }),
     emergency_contact: t.Optional(
         t.String({
-            pattern: "^[A-Za-z]+$",
+            pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s'-]*$",
             minLength: 2,
             maxLength: 255
         }),
