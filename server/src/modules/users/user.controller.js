@@ -2,42 +2,105 @@ import bcrypt from "bcrypt";
 import db from "../../models/index.js"
 import crypto from "crypto";
 
-const { User } = db;
+const { User, Role, Department } = db;
 
 function generateTempPassword() {
     return crypto.randomBytes(8).toString("hex");
 }
 
-export async function createUser({ body }) {
-    console.log("HERE");
-    const { email } = body;
+export async function createUser({ body, set }) {
+    try {
+        const { email } = body;
 
-    //Check if user exists.
-    const existingUser = await User.findOne({
-        where: { email }
-    });
+        //Check if user exists.
+        const existingUser = await User.findOne({
+            where: { email }
+        });
 
-    if (existingUser) {
-        return { error: "Email already registered" };
+        if (existingUser) {
+            set.status = 409;
+            return { error: "Email already registered" };
+        }
+
+        //DOB Validation
+        const dob = new Date(body.dob);
+        const today = new Date();
+
+        if (dob > today) {
+            set.status = 400;
+            return {
+                error: "Date of birth cannot be in the future",
+            };
+        }
+
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+
+        if (
+            monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < dob.getDate())
+        ) {
+            age--;
+        }
+
+        if (age < 18) {
+            set.status = 400;
+            return {
+                error: "User must be at least 18 years old",
+            };
+        }
+
+        if (age > 100) {
+            set.status = 400;
+            return {
+                error: "Please enter a valid date of birth",
+            };
+        }
+
+        //ROLE & DEPARTMENT VALIDATIONS
+        const role = await Role.findByPk(body.role_id);
+        if (!role) {
+            set.status = 400;
+            return { error: "Invalid role selected" };
+        }
+
+        const department = await Department.findByPk(body.department_id);
+        if (!department) {
+            set.status = 400;
+            return { error: "Invalid department selected" };
+        }
+
+        const password = generateTempPassword();
+        //VIEW PASSWORD
+        console.log("PASSWORD", password);
+        //Hash pw
+        const password_hash = await bcrypt.hash(password, 10);
+
+        const payload = {
+            ...body,
+            middle_name: body.middle_name?.trim() || null,
+            emergency_contact: body.emergency_contact?.trim() || null,
+            emergency_phone: body.emergency_phone?.trim() || null,
+            password_hash,
+            role_id: body.role_id
+        }
+
+        //create user
+        const user = await User.create(payload);
+
+        //Remove pw from response
+        const userData = user.toJSON();
+        delete userData.password_hash;
+
+        return userData;
+    } catch (error) {
+        console.error("Error creating user:", error);
+        set.status = 500;
+        return {
+            error: "Could not create user",
+            details: error.message,
+        };
     }
-
-    const password = generateTempPassword();
-    console.log("PASSWORD", password);
-    //Hash pw
-    const password_hash = await bcrypt.hash(password, 10);
-
-    //create user
-    const user = await User.create({
-        ...body,
-        password_hash,
-        role_id: body.role_id
-    });
-
-    //Remove pw from response
-    const userData = user.toJSON();
-    delete userData.password_hash;
-
-    return userData;
 }
 
 export async function getAllUsers() {
@@ -59,7 +122,7 @@ export async function getUser({ params }) {
     return user;
 }
 
-export async function updateUser({ params, body }) {
+export async function updateUser({ params, body, set }) {
     const user = await User.findByPk(params.id);
     if (!user) {
         return { error: "User not found" };

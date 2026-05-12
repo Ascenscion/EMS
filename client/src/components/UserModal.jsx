@@ -10,6 +10,7 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
         register,
         handleSubmit,
         reset,
+        setError,
         formState: { errors }
     } = useForm({
         defaultValues: {
@@ -60,8 +61,18 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
     }, [user, isOpen, reset])
 
     const submitHandler = async (data) => {
-        console.log("Modal form data: ", data);
-        await onSubmit(data, user)
+        try {
+            console.log("Modal form data: ", data);
+            await onSubmit(data, user)
+        } catch (error) {
+            if (error.response?.data?.error == "Email already registered") {
+                setError("email", {
+                    type: "server",
+                    message: "Email already registered.",
+                })
+            }
+        }
+
     }
 
     return (
@@ -96,7 +107,7 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                             rules={{
                                 required: "First name is required",
                                 pattern: {
-                                    value: /^[A-Za-z]+$/,
+                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
                                     message: "First name can only contain letters."
                                 },
                                 validate: value => value.trim() !== "" || "First name cannot be empty"
@@ -112,7 +123,7 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                             register={register}
                             rules={{
                                 pattern: {
-                                    value: /^[A-Za-z]+$/,
+                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
                                     message: "Middle name can only contain letters."
                                 }
                             }}
@@ -130,10 +141,10 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                             rules={{
                                 required: "Last name is required",
                                 pattern: {
-                                    value: /^[A-Za-z]+$/,
+                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
                                     message: "Last name can only contain letters"
                                 },
-                                validate: value => value.trim() !== "" || "First name cannot be empty"
+                                validate: value => value.trim() !== "" || "Last name cannot be empty"
                             }}
                             error={errors.last_name}
                         />
@@ -244,7 +255,7 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                             register={register}
                             rules={{
                                 pattern: {
-                                    value: /^[A-Za-z]+$/,
+                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
                                     message: "Contact name can only contain letters"
                                 }
                             }}

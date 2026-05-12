@@ -167,7 +167,8 @@ const Users = () => {
 
         } catch (error) {
             console.error("Error creating user: ", error)
-            console.error("Backend response: ", error.response?.data)
+            console.error("Backend response: ", error.response?.data);
+            throw error;
         }
     }
 

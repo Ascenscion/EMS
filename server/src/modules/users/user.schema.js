@@ -6,19 +6,28 @@ export const createUserSchema = t.Object({
         minLength: 2,
         maxLength: 50
     }),
-    middle_name: t.String({
-        pattern: "^[A-Za-z]+$"
-    }),
+    middle_name: t.Optional(
+        t.String({
+            pattern: "^[A-Za-z]+$",
+            default: "",
+        }),
+    ),
     last_name: t.String({
         pattern: "^[A-Za-z]+$",
         minLength: 2,
         maxLength: 50
     }),
+    dob: t.String({
+        minLength: 10,
+        maxLength: 10,
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$",
+    }),
     email: t.String({
         format: "email"
     }),
     phone: t.String({
-        pattern: "^[0-9]+$",
+        //pattern: "^[0-9]+$",
+        pattern: "^[0-9()+\\-\\s]{10,20}$",
         minLength: 10,
         maxLength: 15
     }),
@@ -35,19 +44,18 @@ export const createUserSchema = t.Object({
     ),
     emergency_phone: t.Optional(
         t.String({
-            pattern: "^[0-9]+$",
+            //pattern: "^[0-9]+$",
+            pattern: "^[0-9()+\\-\\s]{10,20}$",
             minLength: 10,
             maxLength: 15
         }),
     ),
-    //dob missing t.DATE doesnt work.
-    // password_hash: t.String({
-    //     pattern: "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{8,}$",
-    //     minLength: 8,
-    //     maxLength: 20
-    // }),
-    department_id: t.Integer(),
-    role_id: t.Integer(),
+    department_id: t.Integer({
+        minimum: 1,
+    }),
+    role_id: t.Integer({
+        minimum: 1,
+    }),
 });
 
 export const updateUserSchema = t.Partial(createUserSchema);
