@@ -26,16 +26,20 @@ export const createUserSchema = t.Object({
         minLength: 1,
         maxLength: 255
     }),
-    emergency_contact: t.String({
-        pattern: "^[A-Za-z]+$",
-        minLength: 2,
-        maxLength: 255
-    }),
-    emergency_phone: t.String({
-        pattern: "^[0-9]+$",
-        minLength: 10,
-        maxLength: 15
-    }),
+    emergency_contact: t.Optional(
+        t.String({
+            pattern: "^[A-Za-z]+$",
+            minLength: 2,
+            maxLength: 255
+        }),
+    ),
+    emergency_phone: t.Optional(
+        t.String({
+            pattern: "^[0-9]+$",
+            minLength: 10,
+            maxLength: 15
+        }),
+    ),
     //dob missing t.DATE doesnt work.
     // password_hash: t.String({
     //     pattern: "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{8,}$",

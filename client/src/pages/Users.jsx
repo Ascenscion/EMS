@@ -141,7 +141,9 @@ const Users = () => {
             const payload = {
                 ...formData,
                 department_id: Number(formData.department_id),
-                role_id: Number(formData.role_id)
+                role_id: Number(formData.role_id),
+                emergency_contact: formData.emergency_contact?.trim() || undefined,
+                emergency_phone: formData.emergency_phone?.trim() || undefined,
             }
             if (user) {
                 delete payload.password;
