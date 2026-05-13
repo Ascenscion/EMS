@@ -5,16 +5,19 @@ import InputWrap from "./InputWrap"
 import { useForm } from "react-hook-form"
 
 
-const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
+const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments, isSaving }) => {
     const {
         register,
         handleSubmit,
         reset,
+        setError,
         formState: { errors }
     } = useForm({
         defaultValues: {
             first_name: "",
             last_name: "",
+            middle_name: "",
+            dob: "",
             email: "",
             phone: "",
             address: "",
@@ -26,22 +29,28 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
     })
 
     useEffect(() => {
+
         if (user) {
+            console.log("DOB ", user.dob);
             reset({
                 first_name: user.first_name || "",
+                middle_name: user.middle_name || "",
                 last_name: user.last_name || "",
+                dob: user.dob || "",
                 email: user.email || "",
                 phone: user.phone || "",
-                address: "",
-                emergency_contact: "",
-                emergency_phone: "",
+                address: user.address || "",
+                emergency_contact: user.emergency_contact || "",
+                emergency_phone: user.emergency_phone || "",
                 department_id: user.department_id || "",
                 role_id: user.role_id || "",
             });
         } else {
             reset({
                 first_name: "",
+                middle_name: "",
                 last_name: "",
+                dob: "",
                 email: "",
                 phone: "",
                 address: "",
@@ -54,8 +63,18 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
     }, [user, isOpen, reset])
 
     const submitHandler = async (data) => {
-        console.log("Modal form data: ", data);
-        await onSubmit(data, user)
+        try {
+            console.log("Modal form data: ", data);
+            await onSubmit(data, user)
+        } catch (error) {
+            if (error.response?.data?.error == "Email already registered") {
+                setError("email", {
+                    type: "server",
+                    message: "Email already registered.",
+                })
+            }
+        }
+
     }
 
     return (
@@ -90,9 +109,10 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                             rules={{
                                 required: "First name is required",
                                 pattern: {
-                                    value: /^[A-Za-z]+$/,
+                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
                                     message: "First name can only contain letters."
-                                }
+                                },
+                                validate: value => value.trim() !== "" || "First name cannot be empty"
                             }}
                             error={errors.first_name}
                         />
@@ -105,11 +125,11 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                             register={register}
                             rules={{
                                 pattern: {
-                                    value: /^[A-Za-z]+$/,
+                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
                                     message: "Middle name can only contain letters."
                                 }
                             }}
-                            error={errors.first_name}
+                            error={errors.middle_name}
                         />
                     </div>
                 </div>
@@ -123,9 +143,10 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                             rules={{
                                 required: "Last name is required",
                                 pattern: {
-                                    value: /^[A-Za-z]+$/,
+                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
                                     message: "Last name can only contain letters"
-                                }
+                                },
+                                validate: value => value.trim() !== "" || "Last name cannot be empty"
                             }}
                             error={errors.last_name}
                         />
@@ -133,9 +154,55 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                     <div className='flex-1 min-w-0'>
                         <InputWrap
                             label="DOB"
-                            name="start_date"
+                            name="dob"
                             type="date"
-                            register={register} />
+                            register={register}
+                            rules={{
+                                required: "Date of birth is required",
+                                validate: {
+                                    notInFuture: (value) => {
+                                        const selectedDate = new Date(value);
+                                        const today = new Date();
+
+                                        // Remove time portion
+                                        today.setHours(0, 0, 0, 0);
+
+                                        return (
+                                            selectedDate <= today ||
+                                            "Date of birth cannot be in the future"
+                                        );
+                                    },
+
+                                    minimumAge: (value) => {
+                                        const birthDate = new Date(value);
+                                        const today = new Date();
+
+                                        let age = today.getFullYear() - birthDate.getFullYear();
+                                        const monthDiff =
+                                            today.getMonth() - birthDate.getMonth();
+
+                                        if (
+                                            monthDiff < 0 ||
+                                            (monthDiff === 0 &&
+                                                today.getDate() < birthDate.getDate())
+                                        ) {
+                                            age--;
+                                        }
+
+                                        return age >= 18 || "User must be at least 18 years old";
+                                    },
+
+                                    realisticAge: (value) => {
+                                        const birthDate = new Date(value);
+                                        const today = new Date();
+
+                                        let age = today.getFullYear() - birthDate.getFullYear();
+
+                                        return age <= 100 || "Please enter a valid date of birth";
+                                    },
+                                },
+                            }}
+                            error={errors.dob} />
                     </div>
                 </div>
 
@@ -188,6 +255,12 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                             name="emergency_contact"
                             type="text"
                             register={register}
+                            rules={{
+                                pattern: {
+                                    value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
+                                    message: "Contact name can only contain letters"
+                                }
+                            }}
                         />
                     </div>
                     <div className='flex-1 min-w-0'>
@@ -196,7 +269,6 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                             name="emergency_phone"
                             register={register}
                             rules={{
-                                required: "Phone number is required",
                                 pattern: {
                                     value: /^[0-9()+-\s]{10,20}$/,
                                     message: "Must contain valid phone number"
@@ -221,7 +293,11 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                     options={departments.map((dep) => ({
                         value: dep.id,
                         label: dep.name
-                    }))} />
+                    }))}
+                    rules={{
+                        required: "Department is required."
+                    }}
+                    error={errors.department_id} />
                 <InputWrap
                     label="Role"
                     name="role_id"
@@ -230,7 +306,11 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                     options={roles.map(role => ({
                         value: role.id,
                         label: role.name
-                    }))} />
+                    }))}
+                    rules={{
+                        required: "Role is required."
+                    }}
+                    error={errors.role_id} />
 
 
                 <div className="flex justify-end gap-2 mt-4">
@@ -240,8 +320,10 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments }) => {
                         onClick={onClose}>
                         Cancel
                     </AddButton>
-                    <AddButton type="submit">
-                        {user ? "Update" : "Save"}
+                    <AddButton
+                        type="submit"
+                        disabled={isSaving}>
+                        {isSaving ? "Saving..." : user ? "Update" : "Save"}
                     </AddButton>
                 </div>
             </form>

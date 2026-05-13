@@ -10,6 +10,8 @@ import Assignments from './pages/Assignments'
 import StaffEvents from './pages/StaffEvents'
 import ProtectedRoutes from './routes/ProtectedRoutes'
 import RoleRoute from './routes/RoleRoute'
+import MyApplications from './pages/MyApplications'
+
 function App() {
   return (
     <Routes>
@@ -20,25 +22,33 @@ function App() {
         </ProtectedRoutes>}>
 
         <Route index element={<Dashboard />} />
-
+        {/* MASTER ACCOUNT ID 3. REMOVE LATER SAME AT SIDEBAR COMPONENT */}
         <Route path="/events" element={
-          <RoleRoute allowedRoles={[1]}>
+          <RoleRoute allowedRoles={[1, 3]}>
             <Events />
           </RoleRoute>
         } />
 
         <Route path="/users" element={
-          <RoleRoute allowedRoles={[1]}>
+          <RoleRoute allowedRoles={[1, 3]}>
             <Users />
           </RoleRoute>
         } />
         <Route path="/applications" element={<Applications />} />
         <Route path='/assignments' element={<Assignments />} />
         <Route path='/staffevents' element={
-          <RoleRoute allowedRoles={[2]}>
+          <RoleRoute allowedRoles={[2, 3]}>
             <StaffEvents />
           </RoleRoute>
         }></Route>
+        <Route
+          path="/myapplications"
+          element={
+            <RoleRoute allowedRoles={[2, 3]}>
+              <MyApplications />
+            </RoleRoute>
+          }
+        />
       </Route>
     </Routes>
 

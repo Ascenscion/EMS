@@ -6,6 +6,7 @@ import UserModal from '../components/UserModal.jsx';
 import Modal from '../components/Modal.jsx';
 import { getRoles } from "../services/roleService"
 import { getDepartments } from '../services/departmentService.js';
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 const Users = () => {
     const [users, setUsers] = useState([])
@@ -20,32 +21,65 @@ const Users = () => {
     const [openDeleteFailedModal, setOpenDeleteFailedModal] = useState(false);
     const [roles, setRoles] = useState([])
     const [departments, setDepartments] = useState([])
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchInitialData = async () => {
             try {
-                const roleArray = await getRoles();
-                setRoles(roleArray)
-                console.log(roleArray[0].name);
-                const departmentArray = await getDepartments()
-                setDepartments(departmentArray)
-            } catch (error) {
-                console.log("Error fetching roles", error);
-            }
-        }
-        const fetchUsers = async () => {
-            try {
-                const data = await getUsers()
-                setUsers(data)
-            } catch (error) {
-                console.log("Error fetching users: ", error);
+                setLoading(true);
+
+                const results = await Promise.allSettled([
+                    getRoles(),
+                    getDepartments(),
+                    getUsers(),
+                ]);
+
+                const [rolesResult, departmentsResult, usersResult] = results;
+
+                if (rolesResult.status === "fulfilled") {
+                    setRoles(rolesResult.value);
+                } else {
+                    console.error(
+                        "Roles:",
+                        getErrorMessage(
+                            rolesResult.reason,
+                            "Failed to fetch roles."
+                        )
+                    );
+                }
+
+                if (departmentsResult.status === "fulfilled") {
+                    setDepartments(departmentsResult.value);
+                } else {
+                    console.error(
+                        "Departments:",
+                        getErrorMessage(
+                            departmentsResult.reason,
+                            "Failed to fetch departments."
+                        )
+                    );
+                }
+
+                if (usersResult.status === "fulfilled") {
+                    setUsers(usersResult.value);
+                } else {
+                    console.error(
+                        "Users:",
+                        getErrorMessage(
+                            usersResult.reason,
+                            "Failed to fetch users."
+                        )
+                    );
+                }
             } finally {
-                setLoading(false)
+                setLoading(false);
             }
-        }
-        fetchData()
-        fetchUsers()
-    }, [])
+        };
+
+        fetchInitialData();
+    }, []);
 
     if (loading) {
         return <p>Loading...</p>
@@ -56,8 +90,14 @@ const Users = () => {
         { header: "Last Name", accessor: "last_name" },
         { header: "Email", accessor: "email" },
         { header: "Phone", accessor: "phone" },
-        { header: "Department", accessor: "department_id" },
-        { header: "Role", accessor: "role_id" },
+        {
+            header: "Department",
+            render: (row) => row.department?.name || "No department",
+        },
+        {
+            header: "Role",
+            render: (row) => row.role?.name || "No role",
+        },
         {
             header: "Actions",
             render: (row) => (
@@ -69,14 +109,25 @@ const Users = () => {
                     </button>
 
                     <button
+                        disabled={isDeleting}
                         onClick={() => handleOpenDeleteModal(row)}
                         className='px-3 py-1 text-sm border border-zinc-300 rounded-md hover:bg-zinc-100'>
-                        Delete
+                        {isDeleting ? "Deleting..." : "Delete"}
                     </button>
                 </div >
             )
         }
     ]
+
+    const filteredUsers = users.filter((user) => {
+        const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
+        const email = user.email?.toLowerCase() || "";
+
+        return (
+            fullName.includes(searchTerm.toLowerCase()) ||
+            email.includes(searchTerm.toLowerCase())
+        );
+    });
 
     const handleOpenAddModal = () => {
         setSelectedUser(null)
@@ -100,6 +151,7 @@ const Users = () => {
     }
 
     const handleCloseDeleteModal = () => {
+        setSelectedUser(null)
         setIsDeleteModalOpen(false)
     }
 
@@ -138,10 +190,13 @@ const Users = () => {
     const handleSaveUser = async (formData, user) => {
         console.log("User Data: ", formData, user);
         try {
+            setIsSaving(true)
             const payload = {
                 ...formData,
                 department_id: Number(formData.department_id),
-                role_id: Number(formData.role_id)
+                role_id: Number(formData.role_id),
+                emergency_contact: formData.emergency_contact?.trim() || undefined,
+                emergency_phone: formData.emergency_phone?.trim() || undefined,
             }
             if (user) {
                 delete payload.password;
@@ -164,46 +219,69 @@ const Users = () => {
             }
 
         } catch (error) {
-            console.error("Error creating user: ", error)
-            console.error("Backend response: ", error.response?.data)
+            const message = getErrorMessage(error, "Failed to save/update user");
+            console.log(message);
+            throw error;
+        } finally {
+            setIsSaving(false)
         }
     }
 
     const handleDelete = async (user) => {
-        console.log("DELETE BUTTON CLICKED", user);
+        //AUTH: once implemented add validation so user cant delete himself.
+        if (!user || !user.id) {
+            return;
+        }
+        // UNCOMMENT WHEN AUTH IMPLEMENTED
+        // if (loggedInUser.id === user.id) {
+        //     setDeleteErrorMessage("You cannot delete own account.");
+        //     handleOpenDeleteFailedModal();
+        //     return;
+        // }
         try {
-            const result = await deleteUser(user.id);
-            //console.log("Delete success:", result);
+            setIsDeleting(true);
+
+            await deleteUser(user.id);
             setUsers((prev) => prev.filter((u) => u.id !== user.id));
+            setSelectedUser(null);
+
             handleCloseDeleteModal();
             handleOpenConfirmationModal();
         } catch (error) {
             const backendError = error.response?.data;
 
-            const message =
-                backendError?.message ||
-                backendError ||
-                "Failed to delete user.";
-
+            const message = getErrorMessage(error, "Failed to delete user.")
+            console.log(message);
             setDeleteErrorMessage(message);
             handleCloseDeleteModal()
             handleOpenDeleteFailedModal();
+        } finally {
+            setIsDeleting(false)
         }
     }
 
     return (
         <div className='flex flex-col'>
-            <div className='p-2 flex justify-end'>
+            <div className='p-2 flex justify-end gap-2'>
+                <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full md:w-80 px-3 py-2 border border-zinc-300 rounded-md text-sm"
+                />
                 <AddButton
                     variant='primary'
                     onClick={handleOpenAddModal}>
                     + Add User
                 </AddButton>
+
             </div>
-            <ReTable
-                columns={userColumns}
-                data={users}
-            ></ReTable>
+            {filteredUsers.length === 0 ? (
+                <p className="text-sm text-zinc-500">No users match your search.</p>
+            ) : (
+                <ReTable columns={userColumns} data={filteredUsers} />
+            )}
             <UserModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
@@ -211,6 +289,7 @@ const Users = () => {
                 user={selectedUser}
                 roles={roles}
                 departments={departments}
+                isSaving={isSaving}
             />
             <Modal
                 isOpen={isDeleteModalOpen}
@@ -229,7 +308,7 @@ const Users = () => {
                             <button
                                 onClick={() => handleDelete(selectedUser)}
                                 className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm'>
-                                Confirm
+                                {isDeleting ? "Deleting..." : "Delete"}
                             </button>
                         </div>
                     </div>
