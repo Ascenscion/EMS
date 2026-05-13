@@ -210,7 +210,7 @@ const Events = () => {
                                 onClick={handleCloseDeleteConfirmationModal}
                                 className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'
                             >
-                                Bye Felicia.
+                                Confirmed
                             </button>
                         </div>
                     </div>

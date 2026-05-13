@@ -78,14 +78,14 @@ const Sidebar = () => {
                                 className={navClass}
                             >
                                 <Calendar size={18} />
-                                {!collapsed && "StaffEvents"}
+                                {!collapsed && "Events (Staff)"}
                             </NavLink>
 
                             <NavLink
                                 to="myapplications"
                                 className={navClass}>
                                 <ClipboardList size={18} />
-                                {!collapsed && "MyApplications"}
+                                {!collapsed && "My Applications (Staff)"}
                             </NavLink>
                         </>
                     )}
