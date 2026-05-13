@@ -51,7 +51,7 @@ async function startServer() {
         console.log(`Server running on http://localhost:${process.env.PORT}`);
 
         await db.sequelize.sync();
-        // await db.sequelize.sync({ alter: true });
+        // await db.sequelize.sync({ force: true });
         await seedDatabase(db);
         console.log("tables created");
 
