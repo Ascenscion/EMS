@@ -4,17 +4,21 @@ import ReTable from '../components/ReTable'
 import { createEvent, deleteEvent, getEvents, updateEvent } from '../services/eventService'
 import Modal from '../components/Modal'
 import EventModal from '../components/EventModal'
+import { getErrorMessage } from '../utils/getErrorMessage'
 
 const Events = () => {
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [events, setEvents] = useState([])
-    const [locations, setLocations] = useState([])
     const [selectedEvent, setSelectedEvent] = useState(null)
     const [isEventModalOpen, setIsEventModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [isDeleteConfirmationModalOpen, setIsDeleteConfirmationModalOpen] = useState(false)
     const [isEventCreatedSuccesModalOpen, setIsEventCreatedSuccessModalOpen] = useState(false)
     const [isEventUpdatedSucccesModalOpen, setIsUpdatedSuccessModalOpen] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+    const [saveErrorMessage, setSaveErrorMessage] = useState("")
+    const [isSaveErrorModalOpen, setIsSaveErrorModalOpen] = useState(false)
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -41,6 +45,7 @@ const Events = () => {
     }
 
     const handleCloseCreateNewEventModal = () => {
+        setSelectedEvent(null)
         setIsEventModalOpen(false)
     }
 
@@ -58,7 +63,7 @@ const Events = () => {
         setIsDeleteModalOpen(false)
     }
 
-    const handleOpenDeleteConfirmationModal = (event) => {
+    const handleOpenDeleteConfirmationModal = () => {
         setIsDeleteConfirmationModalOpen(true)
     }
 
@@ -82,14 +87,33 @@ const Events = () => {
         setIsUpdatedSuccessModalOpen(false)
     }
 
+    const handleOpenSaveErrorModal = () => {
+        setIsSaveErrorModalOpen(true)
+    }
+
+    const handleCloseSaveErrorModal = () => {
+        setSaveErrorMessage("")
+        setIsSaveErrorModalOpen(false)
+    }
+
     const handleSaveEvent = async (formData, event) => {
+        const user = JSON.parse(localStorage.getItem("user"))
         const payload = {
             ...formData,
+            name: formData.name?.trim(),
+            description: formData.description?.trim(),
+            location_name: formData.location_name?.trim(),
+            address_line_1: formData.address_line_1?.trim(),
+            address_line_2: formData.address_line_2?.trim() || undefined,
+            city: formData.city?.trim(),
+            state: formData.state?.trim(),
+            zip_code: formData.zip_code?.trim(),
             max_users: Number(formData.max_users),
-            created_by: 1,
+            created_by: user?.id || 1,
             status: "active"
         }
         try {
+            setIsSaving(true)
             if (event) {
                 const updatedEvent = await updateEvent(event.id, payload);
                 setEvents((prev) =>
@@ -103,24 +127,34 @@ const Events = () => {
             }
             handleCloseCreateNewEventModal();
         } catch (error) {
-            console.error("Error saving event: ", error)
-            console.error("Backend Response: ", error.response?.data)
+            const message = getErrorMessage(error, "Failed to save/update event.")
+            console.error("Error saving event: ", message)
+            setSaveErrorMessage(message)
+            handleOpenSaveErrorModal()
+        } finally {
+            setIsSaving(false)
         }
     }
 
     const handleDeleteEvent = async (event) => {
+        if (!event || !event.id) {
+            return;
+        }
+
         try {
-            const result = await deleteEvent(event.id);
+            setIsDeleting(true)
+            await deleteEvent(event.id);
             setEvents((prev) => prev.filter((u) => u.id !== event.id));
             handleCloseDeleteEventModal();
             handleOpenDeleteConfirmationModal(true)
         } catch (error) {
-            const backendError = error.response?.data;
-            const message =
-                backendError?.message ||
-                backendError ||
-                "Failed to delete event";
+            const message = getErrorMessage(error, "Failed to delete event.")
+            console.error("Error deleting event: ", message)
             handleCloseDeleteEventModal();
+            setSaveErrorMessage(message)
+            handleOpenSaveErrorModal()
+        } finally {
+            setIsDeleting(false)
         }
     }
 
@@ -153,6 +187,10 @@ const Events = () => {
         }
     ]
 
+    if (loading) {
+        return <p>Loading...</p>
+    }
+
     return (
         <div className='flex flex-col'>
             <div className='p-2 flex justify-end'>
@@ -171,6 +209,7 @@ const Events = () => {
                 onClose={handleCloseCreateNewEventModal}
                 onSubmit={handleSaveEvent}
                 event={selectedEvent}
+                isSaving={isSaving}
             >
             </EventModal>
             <Modal
@@ -189,8 +228,9 @@ const Events = () => {
                             </button>
                             <button
                                 onClick={() => handleDeleteEvent(selectedEvent)}
+                                disabled={isDeleting}
                                 className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm'>
-                                Confirm
+                                {isDeleting ? "Deleting..." : "Confirm"}
                             </button>
                         </div>
                     </div>
@@ -251,6 +291,25 @@ const Events = () => {
                                 className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'
                             >
                                 Success.
+                            </button>
+                        </div>
+                    </div>
+                </>
+            </Modal>
+            <Modal
+                isOpen={isSaveErrorModalOpen}
+                onClose={handleCloseSaveErrorModal}
+                title={"Could not save event"}
+            >
+                <>
+                    <div className='flex flex-col gap-4'>
+                        <p>{saveErrorMessage}</p>
+                        <div className='flex justify-end'>
+                            <button
+                                onClick={handleCloseSaveErrorModal}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'
+                            >
+                                Close
                             </button>
                         </div>
                     </div>

@@ -35,7 +35,6 @@ export const app = new Elysia({
     .use(authRoutes)
     .use(cors())
     .use(openapi())
-    .use(userRoutes)
     .get("/", () => {
         return { message: "Elysia server running" }
     })
