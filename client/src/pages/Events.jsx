@@ -19,6 +19,7 @@ const Events = () => {
     const [isDeleting, setIsDeleting] = useState(false)
     const [saveErrorMessage, setSaveErrorMessage] = useState("")
     const [isSaveErrorModalOpen, setIsSaveErrorModalOpen] = useState(false)
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -187,23 +188,48 @@ const Events = () => {
         }
     ]
 
+    const filteredEvents = events.filter((event) => {
+        const name = event.name?.toLowerCase() || "";
+        const status = event.status?.toLowerCase() || "";
+        const location = event.Location?.name?.toLowerCase() || "";
+        const city = event.Location?.city?.toLowerCase() || "";
+
+        return (
+            name.includes(searchTerm.toLowerCase()) ||
+            status.includes(searchTerm.toLowerCase()) ||
+            location.includes(searchTerm.toLowerCase()) ||
+            city.includes(searchTerm.toLowerCase())
+        );
+    });
+
     if (loading) {
         return <p>Loading...</p>
     }
 
     return (
         <div className='flex flex-col'>
-            <div className='p-2 flex justify-end'>
+            <div className='p-2 flex justify-end gap-2'>
+                <input
+                    type="text"
+                    placeholder="Search events..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full md:w-80 px-3 py-2 border border-zinc-300 rounded-md text-sm"
+                />
                 <AddButton
                     variant='primary'
                     onClick={handleOpenCreateNewEventModal}>
                     + New Event
                 </AddButton>
             </div>
-            <ReTable
-                columns={eventColumns}
-                data={events}>
-            </ReTable>
+            {filteredEvents.length === 0 ? (
+                <p className="text-sm text-zinc-500">No events match your search.</p>
+            ) : (
+                <ReTable
+                    columns={eventColumns}
+                    data={filteredEvents}>
+                </ReTable>
+            )}
             <EventModal
                 isOpen={isEventModalOpen}
                 onClose={handleCloseCreateNewEventModal}
