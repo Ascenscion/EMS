@@ -8,8 +8,8 @@ const RoleRoute = ({ children, allowedRoles }) => {
         return <Navigate to="/login" replace />
     }
 
-    if (!allowedRoles.includes(user.role_id)) {
-        return <Navigate to="/login" replace />
+    if (!allowedRoles.includes(Number(user.role_id))) {
+        return <Navigate to="/" replace />
     }
     return children
 }

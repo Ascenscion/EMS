@@ -11,6 +11,9 @@ import {
 
 const Sidebar = () => {
     const user = JSON.parse(localStorage.getItem("user"))
+    const roleId = Number(user?.role_id)
+    const canManageOperations = [1, 3].includes(roleId)
+    const canUseStaffTools = [2, 3].includes(roleId)
     const [collapsed, setCollapsed] = useState(false)
     const navClass = ({ isActive }) =>
         `flex items-center gap-3 px-4 py-2 rounded-lg transition
@@ -42,8 +45,7 @@ const Sidebar = () => {
                         <LayoutDashboard size={18} />
                         {!collapsed && "Dashboard"}
                     </NavLink>
-                    {/* MASTER ACCOUNT (ID 3) FOR FULL ACCESS TO ALL ROUTES. REMOVE LATER ON */}
-                    {user?.role_id === 1 || 3 && (
+                    {canManageOperations && (
                         <>
                             <NavLink
                                 to="/users"
@@ -71,7 +73,7 @@ const Sidebar = () => {
                         </>
                     )}
 
-                    {user?.role_id === 2 || 3 && (
+                    {canUseStaffTools && (
                         <>
                             <NavLink
                                 to="/staffevents"

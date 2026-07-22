@@ -1,4 +1,9 @@
+import bcrypt from "bcrypt";
+
+const DEMO_PASSWORD = "DemoPass123!";
+
 export async function seedDatabase(db) {
+    const demoPasswordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
 
     const departments = [
         { name: "Operations" },
@@ -20,7 +25,7 @@ export async function seedDatabase(db) {
             last_name: "Ramirez",
             email: "carlos.ramirez@email.com",
             phone: "3125551001",
-            password_hash: "hashed_password_1",
+            password_hash: demoPasswordHash,
             department_id: 1,
             role_id: 1
         },
@@ -29,7 +34,7 @@ export async function seedDatabase(db) {
             last_name: "Lopez",
             email: "maria.lopez@email.com",
             phone: "3125551002",
-            password_hash: "hashed_password_2",
+            password_hash: demoPasswordHash,
             department_id: 2,
             role_id: 2
         },
@@ -38,7 +43,7 @@ export async function seedDatabase(db) {
             last_name: "Ortiz",
             email: "daniel.ortiz@email.com",
             phone: "3125551003",
-            password_hash: "hashed_password_3",
+            password_hash: demoPasswordHash,
             department_id: 3,
             role_id: 3
         },
@@ -47,7 +52,7 @@ export async function seedDatabase(db) {
             last_name: "Martinez",
             email: "sofia.martinez@email.com",
             phone: "3125551004",
-            password_hash: "hashed_password_4",
+            password_hash: demoPasswordHash,
             department_id: 1,
             role_id: 3
         },
@@ -56,7 +61,7 @@ export async function seedDatabase(db) {
             last_name: "Hernandez",
             email: "luis.hernandez@email.com",
             phone: "3125551005",
-            password_hash: "hashed_password_5",
+            password_hash: demoPasswordHash,
             department_id: 2,
             role_id: 3
         }
@@ -266,6 +271,17 @@ export async function seedDatabase(db) {
     if (userCount === 0) {
         await db.User.bulkCreate(users);
         console.log("Users seeded");
+    } else {
+        for (const seedUser of users) {
+            const user = await db.User.findOne({
+                where: { email: seedUser.email }
+            });
+
+            if (user && !user.password_hash?.startsWith("$2")) {
+                await user.update({ password_hash: demoPasswordHash });
+                console.log(`Demo password repaired for ${seedUser.email}`);
+            }
+        }
     }
 
     // Events

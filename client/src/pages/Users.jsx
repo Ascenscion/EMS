@@ -140,9 +140,7 @@ const Users = () => {
             "Email",
             "Phone",
             "Department",
-            "Role",
-            "Clock In",
-            "Clock Out"
+            "Role"
         ];
 
         const tableRows = filteredUsers.map((user) => [
@@ -159,7 +157,7 @@ const Users = () => {
             body: tableRows
         })
 
-        doc.save();
+        doc.save("users-report.pdf");
     }
 
     const handleOpenAddModal = () => {
