@@ -1,23 +1,31 @@
-import { DATE, where } from "sequelize";
 import db from "../../models/index.js"
 
 const { Application, User, Event } = db;
 
-export async function createApplication({ body }) {
-    //const { applied_at, reviewed_by, reviewed_at, user_id, event_id } = body;
-    //console.log("STATUS", status);
+export async function createApplication({ body, set }) {
     try {
+        const userId = Number(body.user_id);
+        const eventId = Number(body.event_id);
+        const shiftId = body.shift_id ? Number(body.shift_id) : null;
+
+        if (!userId || !eventId) {
+            set.status = 400;
+            return {
+                message: "User and event are required",
+            };
+        }
+
         const existingApplication = await Application.findOne({
             where: {
-                user_id: body.user_id,
-                event_id: body.event_id,
+                user_id: userId,
+                event_id: eventId,
             },
         });
 
         if (existingApplication) {
             set.status = 409;
             return {
-                error: "User has already applied to this event",
+                message: "User has already applied to this event",
             };
         }
 
@@ -25,26 +33,20 @@ export async function createApplication({ body }) {
             status: "pending",
             applied_at: new Date(),
             reviewed_at: null,
-            reviewed_by: null,
-            user_id: body.user_id,
-            shift_id: body.shift_id, //This will probably give me an error later
-            event_id: body.event_id
+            reviewed_by_user_id: null,
+            user_id: userId,
+            shift_id: shiftId,
+            event_id: eventId
         })
 
-        console.log(application);
         return application;
 
     } catch (error) {
         console.error("Error creating application:", error);
-        console.error("Name:", error.name);
-        console.error("Message:", error.message);
-        console.error("Errors:", error.errors?.map(e => e.message));
 
         set.status = 500;
         return {
-            error: "Could not create application",
-            name: error.name,
-            message: error.message,
+            message: "Could not create application",
             details: error.errors?.map(e => e.message),
         };
     }
@@ -158,6 +160,5 @@ export async function deleteApplication({ params }) {
     })
     return deleted;
 }
-
 
 

@@ -11,11 +11,11 @@ export const eventRoutes = new Elysia({
 })
     .get("/", controller.getAllEvents)
 
+    .get("/active", controller.getActiveEvents)
+
     .get("/:id", controller.getEvent, {
         params: eventIdParam
     })
-
-    .get("/active", controller.getActiveEvents)
 
     .post("/", controller.createEvent, {
         body: createEventSchema

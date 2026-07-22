@@ -1,9 +1,9 @@
 import React from "react"
 
-const AddButton = ({ children, onClick, type = "button", variant = "primary", className = "", }) => {
+const AddButton = ({ children, onClick, type = "button", variant = "primary", className = "", disabled = false }) => {
 
     const base =
-        "px-4 py-2 rounded-lg text-sm font-medium transition duration-200"
+        "px-4 py-2 rounded-lg text-sm font-medium transition duration-200 disabled:cursor-not-allowed disabled:opacity-60"
 
     const variants = {
         primary:
@@ -18,6 +18,7 @@ const AddButton = ({ children, onClick, type = "button", variant = "primary", cl
         <button
             type={type}
             onClick={onClick}
+            disabled={disabled}
             className={`${base} ${variants[variant]} ${className}`}
         >
             {children}

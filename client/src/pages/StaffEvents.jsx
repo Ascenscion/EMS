@@ -8,7 +8,9 @@ import { createApplication, getApplicationbyUser } from '../services/application
 
 
 const StaffEvents = () => {
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [isApplying, setIsApplying] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
     const [events, setEvents] = useState([])
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
     const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false)
@@ -16,8 +18,10 @@ const StaffEvents = () => {
     const [applications, setApplications] = useState([])
 
     const user = JSON.parse(localStorage.getItem("user"))
+    const userId = Number(user?.id)
 
     const handleOpenApplyModal = (event) => {
+        setErrorMessage("")
         setSelectedEvent(event)
         setIsApplyModalOpen(true)
     }
@@ -27,21 +31,33 @@ const StaffEvents = () => {
     }
 
     const handleApply = async () => {
+        if (!selectedEvent || !userId) {
+            setErrorMessage("You must be signed in to apply to an event.")
+            return;
+        }
+
         try {
+            setIsApplying(true)
+            setErrorMessage("")
             const payload = {
                 event_id: selectedEvent.id,
-                user_id: user.id,
+                user_id: userId,
                 status: "pending"
             }
-            console.log("Application payload:", payload);
+
             await createApplication(payload)
-            const updatedApplications = await getApplicationbyUser(user.id);
+            const updatedApplications = await getApplicationbyUser(userId);
             setApplications(updatedApplications)
             handleCloseApplyModal()
             handleOpenConfirmationModal()
         } catch (error) {
-            console.log("Error applying to event: ", error);
-            console.log("Backend response: ", error.response?.data);
+            setErrorMessage(
+                error.response?.data?.message ||
+                error.response?.data?.error ||
+                "Could not submit your request."
+            )
+        } finally {
+            setIsApplying(false)
         }
     }
 
@@ -54,39 +70,38 @@ const StaffEvents = () => {
     }
 
     const hasApplied = (eventId) => {
-        console.log("Checking event:", eventId);
-        console.log("Applications:", applications);
         return applications.some((app) =>
-            app.user_id === user.id &&
+            Number(app.user_id) === userId &&
             app.event_id === eventId
         );
     };
 
     useEffect(() => {
         const fetchEvents = async () => {
+            if (!userId) {
+                setErrorMessage("You must be signed in to view available events.")
+                setLoading(false)
+                return;
+            }
+
             try {
+                setErrorMessage("")
                 const data = await getActiveEvents()
                 setEvents(data)
-                console.log("Fetched Events: ", data);
-                console.log("First Location:", data[0]?.Location?.name);
-                const userApplications = await getApplicationbyUser(user.id)
-                console.log("Logged user:", user)
-                console.log("User applications:", userApplications)
-                console.log("Active events:", data)
+                const userApplications = await getApplicationbyUser(userId)
                 setApplications(userApplications)
             } catch (error) {
-                console.log("Error fetching events", error);
+                setErrorMessage(
+                    error.response?.data?.message ||
+                    error.response?.data?.error ||
+                    "Could not load active events."
+                )
             } finally {
                 setLoading(false)
             }
         }
         fetchEvents()
-    }, [])
-
-    useEffect(() => {
-        console.log("Events state changed:", events)
-        console.log("First event from state:", events[0])
-    }, [events])
+    }, [userId])
 
     const eventColumns = [
         { header: "Name", accessor: "name" },
@@ -102,19 +117,20 @@ const StaffEvents = () => {
         { header: "End Date", accessor: "end_date" },
         {
             header: "Actions",
-            render: (row) => (
-
-                <div className='flex gap-2'>
+            render: (row) => {
+                const applied = hasApplied(row.id)
+                return (
+                    <div className='flex gap-2'>
                     <button
-                        disabled={hasApplied(row.id)}
+                        disabled={applied}
                         onClick={() => handleOpenApplyModal(row)}
                         className={`px-3 py-1 text-sm rounded-md
-        ${hasApplied(row.id)
+        ${applied
                                 ? "bg-zinc-300 text-zinc-500 cursor-not-allowed"
                                 : "bg-zinc-900 text-white hover:bg-zinc-800"
                             }`}
                     >
-                        {hasApplied(row.id) ? "Applied" : "Apply"}
+                        {applied ? "Applied" : "Apply"}
 
                     </button>
                     <button
@@ -123,16 +139,31 @@ const StaffEvents = () => {
                         Info
                     </button>
                 </div>
-            )
+                )
+            }
         }
     ]
 
+    if (loading) {
+        return <p>Loading active events...</p>
+    }
+
     return (
-        <div className='flex flex-col'>
-            <ReTable
-                columns={eventColumns}
-                data={events}>
-            </ReTable>
+        <div className='flex flex-col gap-3'>
+            {errorMessage && (
+                <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {errorMessage}
+                </p>
+            )}
+
+            {events.length === 0 ? (
+                <p className="text-sm text-zinc-500">No active events are available right now.</p>
+            ) : (
+                <ReTable
+                    columns={eventColumns}
+                    data={events}>
+                </ReTable>
+            )}
             <Modal
                 isOpen={isApplyModalOpen}
                 onClose={handleCloseApplyModal}
@@ -150,14 +181,16 @@ const StaffEvents = () => {
                             <AddButton
                                 type='button'
                                 variant='secondary'
-                                onClick={handleCloseApplyModal}>
+                                onClick={handleCloseApplyModal}
+                                disabled={isApplying}>
                                 Cancel
                             </AddButton>
                             <AddButton
                                 type='button'
                                 variant='primary'
-                                onClick={handleApply}>
-                                Confirm
+                                onClick={handleApply}
+                                disabled={isApplying}>
+                                {isApplying ? "Submitting..." : "Confirm"}
                             </AddButton>
                         </div>
                     </div>
