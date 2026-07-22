@@ -26,11 +26,13 @@ const Users = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [loadErrorMessage, setLoadErrorMessage] = useState("");
 
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
                 setLoading(true);
+                setLoadErrorMessage("");
 
                 const results = await Promise.allSettled([
                     getRoles(),
@@ -43,37 +45,19 @@ const Users = () => {
                 if (rolesResult.status === "fulfilled") {
                     setRoles(rolesResult.value);
                 } else {
-                    console.error(
-                        "Roles:",
-                        getErrorMessage(
-                            rolesResult.reason,
-                            "Failed to fetch roles."
-                        )
-                    );
+                    setLoadErrorMessage(getErrorMessage(rolesResult.reason, "Failed to fetch roles."));
                 }
 
                 if (departmentsResult.status === "fulfilled") {
                     setDepartments(departmentsResult.value);
                 } else {
-                    console.error(
-                        "Departments:",
-                        getErrorMessage(
-                            departmentsResult.reason,
-                            "Failed to fetch departments."
-                        )
-                    );
+                    setLoadErrorMessage(getErrorMessage(departmentsResult.reason, "Failed to fetch departments."));
                 }
 
                 if (usersResult.status === "fulfilled") {
                     setUsers(usersResult.value);
                 } else {
-                    console.error(
-                        "Users:",
-                        getErrorMessage(
-                            usersResult.reason,
-                            "Failed to fetch users."
-                        )
-                    );
+                    setLoadErrorMessage(getErrorMessage(usersResult.reason, "Failed to fetch users."));
                 }
             } finally {
                 setLoading(false);
@@ -219,7 +203,6 @@ const Users = () => {
         setDeleteErrorMessage("");
     }
     const handleSaveUser = async (formData, user) => {
-        console.log("User Data: ", formData, user);
         try {
             setIsSaving(true)
             const payload = {
@@ -237,10 +220,7 @@ const Users = () => {
                 handleCloseModal();
                 handleOpenUpdatedUserConfirmationModal();
             } else {
-                console.log("FORM DATA:", formData)
-                console.log("PAYLOAD:", payload)
                 const newUser = await createUser(payload);
-                console.log("Created user response:", newUser);
                 setUsers(prev => [
                     ...prev,
                     newUser
@@ -250,8 +230,6 @@ const Users = () => {
             }
 
         } catch (error) {
-            const message = getErrorMessage(error, "Failed to save/update user");
-            console.log(message);
             throw error;
         } finally {
             setIsSaving(false)
@@ -279,10 +257,7 @@ const Users = () => {
             handleCloseDeleteModal();
             handleOpenConfirmationModal();
         } catch (error) {
-            const backendError = error.response?.data;
-
             const message = getErrorMessage(error, "Failed to delete user.")
-            console.log(message);
             setDeleteErrorMessage(message);
             handleCloseDeleteModal()
             handleOpenDeleteFailedModal();
@@ -314,6 +289,11 @@ const Users = () => {
                 </AddButton>
 
             </div>
+            {loadErrorMessage && (
+                <p className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {loadErrorMessage}
+                </p>
+            )}
             {filteredUsers.length === 0 ? (
                 <p className="text-sm text-zinc-500">No users match your search.</p>
             ) : (

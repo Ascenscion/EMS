@@ -1,16 +1,29 @@
-import { Routes, Route } from 'react-router-dom'
+import { Navigate, Routes, Route } from 'react-router-dom'
 import './App.css'
 import MainLayout from './layouts/MainLayout'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
 import Users from './pages/Users'
 import Events from './pages/Events'
 import Applications from './pages/Applications'
-import Assignments from './pages/Assignments'
 import StaffEvents from './pages/StaffEvents'
 import ProtectedRoutes from './routes/ProtectedRoutes'
 import RoleRoute from './routes/RoleRoute'
 import MyApplications from './pages/MyApplications'
+
+const DefaultRoute = () => {
+  const user = JSON.parse(localStorage.getItem("user"))
+  const roleId = Number(user?.role_id)
+
+  if ([1, 3].includes(roleId)) {
+    return <Navigate to="/events" replace />
+  }
+
+  if (roleId === 2) {
+    return <Navigate to="/staffevents" replace />
+  }
+
+  return <Navigate to="/login" replace />
+}
 
 function App() {
   return (
@@ -21,8 +34,7 @@ function App() {
           <MainLayout />
         </ProtectedRoutes>}>
 
-        <Route index element={<Dashboard />} />
-        {/* MASTER ACCOUNT ID 3. REMOVE LATER SAME AT SIDEBAR COMPONENT */}
+        <Route index element={<DefaultRoute />} />
         <Route path="/events" element={
           <RoleRoute allowedRoles={[1, 3]}>
             <Events />
@@ -35,7 +47,6 @@ function App() {
           </RoleRoute>
         } />
         <Route path="/applications" element={<Applications />} />
-        <Route path='/assignments' element={<Assignments />} />
         <Route path='/staffevents' element={
           <RoleRoute allowedRoles={[2, 3]}>
             <StaffEvents />
@@ -52,21 +63,6 @@ function App() {
       </Route>
     </Routes>
 
-    //INCASE OFF ACCIDENT UNCOMMENT BOTTOM
-    // <Routes>
-    //   <Route path="/login" element={<Login />} />
-
-    //   <Route path="/" element={<MainLayout />}>
-    //     <Route index element={<Dashboard />} />
-
-    //     <Route path="events" element={<Events />} />
-    //     <Route path="users" element={<Users />} />
-    //     <Route path="applications" element={<Applications />} />
-    //     <Route path="assignments" element={<Assignments />} />
-    //     <Route path="staffevents" element={<StaffEvents />} />
-    //     <Route path="myapplications" element={<MyApplications />} />
-    //   </Route>
-    // </Routes>
   )
 }
 

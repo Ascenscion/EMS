@@ -27,18 +27,14 @@ const Events = () => {
                 const data = await getEvents()
                 setEvents(data)
             } catch (error) {
-                console.log("Error fetching events", error);
+                setSaveErrorMessage(getErrorMessage(error, "Failed to load events."))
+                handleOpenSaveErrorModal()
             } finally {
                 setLoading(false)
             }
         }
         fetchEvents()
     }, [])
-
-    useEffect(() => {
-        console.log("Events state changed:", events)
-        console.log("First event from state:", events[0])
-    }, [events])
 
     const handleOpenCreateNewEventModal = () => {
         setSelectedEvent(null)
@@ -129,7 +125,6 @@ const Events = () => {
             handleCloseCreateNewEventModal();
         } catch (error) {
             const message = getErrorMessage(error, "Failed to save/update event.")
-            console.error("Error saving event: ", message)
             setSaveErrorMessage(message)
             handleOpenSaveErrorModal()
         } finally {
@@ -150,7 +145,6 @@ const Events = () => {
             handleOpenDeleteConfirmationModal(true)
         } catch (error) {
             const message = getErrorMessage(error, "Failed to delete event.")
-            console.error("Error deleting event: ", message)
             handleCloseDeleteEventModal();
             setSaveErrorMessage(message)
             handleOpenSaveErrorModal()
@@ -172,7 +166,6 @@ const Events = () => {
             render: (row) => (
 
                 <div className='flex gap-2'>
-                    {/* {console.log("ROW", row)} */}
                     <button
                         onClick={() => handleOpenEditEventModal(row)}
                         className='px-3 py-1 text-sm bg-zinc-900 text-white rounded-md hover:bg-zinc-800'>

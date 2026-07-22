@@ -86,9 +86,6 @@ export async function createUser({ body, set }) {
         }
 
         const password = generateTempPassword();
-        //VIEW PASSWORD
-        console.log("PASSWORD", password);
-        //Hash pw
         const password_hash = await bcrypt.hash(password, 10);
 
         const payload = {
@@ -137,7 +134,6 @@ export async function getAllUsers() {
             ],
             order: [["id", "ASC"]],
         });
-        console.log("USERS:", users);
         return users;
     } catch (error) {
         console.error("Error fetching users:", error);
@@ -156,12 +152,9 @@ export async function getUser({ params }) {
         const user = await User.findByPk(params.id, {
             attributes: { exclude: ["password_hash"] }
         });
-        console.log("USER", user);
-        console.log("PARAMS", params.id);
         if (!user) {
             return { error: "User not found." }
         }
-        console.log("USER DOB: ", user);
         return user;
     } catch (error) {
         console.error("Error fetching user:", error);
