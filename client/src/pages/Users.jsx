@@ -7,6 +7,8 @@ import Modal from '../components/Modal.jsx';
 import { getRoles } from "../services/roleService"
 import { getDepartments } from '../services/departmentService.js';
 import { getErrorMessage } from "../utils/getErrorMessage";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const Users = () => {
     const [users, setUsers] = useState([])
@@ -128,6 +130,37 @@ const Users = () => {
             email.includes(searchTerm.toLowerCase())
         );
     });
+
+    const generatePDF = () => {
+        const doc = new jsPDF();
+
+        const tableColumn = [
+            "First Name",
+            "Last Name",
+            "Email",
+            "Phone",
+            "Department",
+            "Role",
+            "Clock In",
+            "Clock Out"
+        ];
+
+        const tableRows = filteredUsers.map((user) => [
+            user.first_name,
+            user.last_name,
+            user.email,
+            user.phone,
+            user.department?.name || "No department",
+            user.role?.name || "No role"
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows
+        })
+
+        doc.save();
+    }
 
     const handleOpenAddModal = () => {
         setSelectedUser(null)
@@ -270,6 +303,12 @@ const Users = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full md:w-80 px-3 py-2 border border-zinc-300 rounded-md text-sm"
                 />
+                <button
+                    onClick={generatePDF}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700"
+                >
+                    Export PDF
+                </button>
                 <AddButton
                     variant='primary'
                     onClick={handleOpenAddModal}>
