@@ -52,7 +52,7 @@ export async function createApplication({ body, set }) {
     }
 }
 
-export async function getApplications() {
+export async function getApplications({ set }) {
     try {
         const applications = await Application.findAll({
             include: [
@@ -77,10 +77,9 @@ export async function getApplications() {
         return applications;
     } catch (error) {
         console.error("Error fetching applications: ", error);
-        console.log("Backend error:", error.response?.data);
         set.status = 500;
         return {
-            error: "Could not fetch applications",
+            message: "Could not fetch applications",
             details: error.message,
         }
     }
@@ -88,26 +87,46 @@ export async function getApplications() {
 
 export async function updateApplicationStatus({ params, body, set }) {
     try {
-        const { id } = params;
+        const id = Number(params.id);
         const { status, reviewed_by_user_id } = body;
 
         const application = await Application.findByPk(id);
 
         if (!application) {
             set.status = 404;
-            return { error: "Application not found." }
+            return { message: "Application not found." }
         }
+
         application.status = status;
         application.reviewed_by_user_id = reviewed_by_user_id;
         application.reviewed_at = new Date();
 
         await application.save();
-        return application;
+
+        return Application.findByPk(id, {
+            include: [
+                {
+                    model: User,
+                    as: "user",
+                    attributes: ["id", "first_name", "last_name", "email"]
+                },
+                {
+                    model: Event,
+                    as: "event",
+                    attributes: ["id", "name"]
+                },
+                {
+                    model: User,
+                    as: "reviewer",
+                    attributes: ["id", "first_name", "last_name"]
+                }
+            ]
+        });
     } catch (error) {
         console.error("Error updating application: ", error);
         set.status = 500;
         return {
-            error: "Could not update application",
+            message: "Could not update application",
             details: error.message,
         }
     }
@@ -160,5 +179,4 @@ export async function deleteApplication({ params }) {
     })
     return deleted;
 }
-
 

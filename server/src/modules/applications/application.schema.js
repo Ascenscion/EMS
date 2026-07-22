@@ -28,5 +28,8 @@ export const reviewApplicationSchema = t.Object({
     status: t.Union([
         t.Literal("approved"),
         t.Literal("rejected")
-    ])
+    ]),
+    reviewed_by_user_id: t.Integer({
+        minimum: 1
+    })
 })

@@ -3,7 +3,8 @@ import * as controller from "./application.controller.js";
 import {
     createApplicationSchema,
     updateApplicationSchema,
-    applicationIdParam
+    applicationIdParam,
+    reviewApplicationSchema
 } from "./application.schema.js";
 
 export const applicationRoutes = new Elysia({
@@ -13,7 +14,10 @@ export const applicationRoutes = new Elysia({
     .get("/user/:id", controller.getApplicationsByUser, {
         params: applicationIdParam
     })
-    .patch("/:id/status", controller.updateApplicationStatus)
+    .patch("/:id/status", controller.updateApplicationStatus, {
+        params: applicationIdParam,
+        body: reviewApplicationSchema
+    })
     .post("/", controller.createApplication, {
         body: createApplicationSchema
     })
