@@ -5,9 +5,11 @@ import { getApplications, updateApplicationStatus } from '../services/applicatio
 import ReTable from '../components/ReTable.jsx';
 import Modal from '../components/Modal.jsx';
 import { getErrorMessage } from '../utils/getErrorMessage.js';
+import { getActiveEvents } from '../services/eventService.js';
 
 const Applications = () => {
     const [applications, setApplications] = useState([]);
+    const [activeEvents, setActiveEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -19,6 +21,7 @@ const Applications = () => {
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
     const [activeTab, setActiveTab] = useState("pending");
+    const [selectedEventId, setSelectedEventId] = useState("");
 
     const handleOpenConfirmModal = (application, status) => {
         setErrorMessage("");
@@ -48,11 +51,23 @@ const Applications = () => {
 
 
     const getCountByStatus = (status) =>
-        applications.filter((app) => app.status === status).length;
+        applications.filter((app) => {
+            const matchesStatus = app.status === status;
+            const matchesEvent = selectedEventId
+                ? app.event_id === Number(selectedEventId)
+                : true;
 
-    const filteredApplications = applications.filter(
-        (app) => app.status === activeTab
-    );
+            return matchesStatus && matchesEvent;
+        }).length;
+
+    const filteredApplications = applications.filter((app) => {
+        const matchesStatus = app.status === activeTab;
+        const matchesEvent = selectedEventId
+            ? app.event_id === Number(selectedEventId)
+            : true;
+
+        return matchesStatus && matchesEvent;
+    });
 
     const tabs = [
         { label: "Pending", value: "pending" },
@@ -67,8 +82,13 @@ const Applications = () => {
         const fetchApplications = async () => {
             try {
                 setErrorMessage("");
-                const data = await getApplications();
-                setApplications(data);
+                const [applicationsData, activeEventsData] = await Promise.all([
+                    getApplications(),
+                    getActiveEvents(),
+                ]);
+
+                setApplications(applicationsData);
+                setActiveEvents(activeEventsData);
             } catch (error) {
                 setErrorMessage(getErrorMessage(error, "Could not load applications."));
             } finally {
@@ -193,23 +213,41 @@ const Applications = () => {
                 </p>
             )}
 
-            <div className="flex gap-2 border-b border-zinc-200 mb-4">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.value}
-                        onClick={() => setActiveTab(tab.value)}
-                        className={`px-4 py-2 text-sm font-medium border-b-2 transition
+            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="flex gap-2 border-b border-zinc-200">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.value}
+                            onClick={() => setActiveTab(tab.value)}
+                            className={`px-4 py-2 text-sm font-medium border-b-2 transition
             ${activeTab === tab.value
-                                ? "border-zinc-900 text-zinc-900"
-                                : "border-transparent text-zinc-500 hover:text-zinc-800"
-                            }`}
-                    >
-                        {tab.label} ({getCountByStatus(tab.value)})
-                    </button>
-                ))}
+                                    ? "border-zinc-900 text-zinc-900"
+                                    : "border-transparent text-zinc-500 hover:text-zinc-800"
+                                }`}
+                        >
+                            {tab.label} ({getCountByStatus(tab.value)})
+                        </button>
+                    ))}
+                </div>
+
+                <select
+                    value={selectedEventId}
+                    onChange={(event) => setSelectedEventId(event.target.value)}
+                    className="w-full md:w-72 px-3 py-2 border border-zinc-300 rounded-md text-sm bg-white text-zinc-700"
+                >
+                    <option value="">All active events</option>
+                    {activeEvents.map((event) => (
+                        <option key={event.id} value={event.id}>
+                            {event.name}
+                        </option>
+                    ))}
+                </select>
             </div>
             {filteredApplications.length === 0 ? (
-                <p className="text-sm text-zinc-500">No {activeTab} applications.</p>
+                <p className="text-sm text-zinc-500">
+                    No {activeTab} applications
+                    {selectedEventId ? " for the selected event" : ""}.
+                </p>
             ) : (
                 <ReTable
                     columns={activeTab === "pending" ? pendingColumns : reviewedColumns}
