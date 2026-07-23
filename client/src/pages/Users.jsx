@@ -4,6 +4,7 @@ import { getUsers, createUser, deleteUser, updateUser } from '../services/userSe
 import AddButton from '../components/AddButton.jsx';
 import UserModal from '../components/UserModal.jsx';
 import Modal from '../components/Modal.jsx';
+import UserActionsDropdown from '../components/UserActionsDropdown.jsx';
 import { getRoles } from "../services/roleService"
 import { getDepartments } from '../services/departmentService.js';
 import { getErrorMessage } from "../utils/getErrorMessage";
@@ -24,9 +25,14 @@ const Users = () => {
     const [roles, setRoles] = useState([])
     const [departments, setDepartments] = useState([])
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+    const [selectedStatusUser, setSelectedStatusUser] = useState(null);
+    const [statusAction, setStatusAction] = useState(null);
+    const [statusUpdatingUserId, setStatusUpdatingUserId] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [loadErrorMessage, setLoadErrorMessage] = useState("");
+    const [activeTab, setActiveTab] = useState("active");
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -87,25 +93,35 @@ const Users = () => {
         {
             header: "Actions",
             render: (row) => (
-                < div className='flex gap-2' >
-                    <button
-                        onClick={() => { handleOpenEditModal(row) }}
-                        className='px-3 py-1 text-sm bg-zinc-900 text-white rounded-md hover:bg-zinc-800'>
-                        Edit
-                    </button>
-
-                    <button
-                        disabled={isDeleting}
-                        onClick={() => handleOpenDeleteModal(row)}
-                        className='px-3 py-1 text-sm border border-zinc-300 rounded-md hover:bg-zinc-100'>
-                        {isDeleting ? "Deleting..." : "Delete"}
-                    </button>
-                </div >
+                <UserActionsDropdown
+                    user={row}
+                    isDeleting={isDeleting}
+                    isStatusUpdating={statusUpdatingUserId === row.id}
+                    onEdit={handleOpenEditModal}
+                    onArchive={handleOpenArchiveModal}
+                    onActivate={handleOpenActivateModal}
+                    onDelete={handleOpenDeleteModal}
+                />
             )
         }
     ]
 
-    const filteredUsers = users.filter((user) => {
+    const tabs = [
+        { label: "Active", value: "active" },
+        { label: "Archive", value: "archive" },
+    ];
+
+    const isActiveUser = (user) => user.is_active !== false;
+
+    const getCountByStatus = (status) => users.filter((user) => (
+        status === "active" ? isActiveUser(user) : !isActiveUser(user)
+    )).length;
+
+    const usersByStatus = users.filter((user) => (
+        activeTab === "active" ? isActiveUser(user) : !isActiveUser(user)
+    ));
+
+    const filteredUsers = usersByStatus.filter((user) => {
         const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
         const email = user.email?.toLowerCase() || "";
 
@@ -202,6 +218,25 @@ const Users = () => {
         setOpenDeleteFailedModal(false)
         setDeleteErrorMessage("");
     }
+
+    const handleOpenArchiveModal = (user) => {
+        setSelectedStatusUser(user);
+        setStatusAction("archive");
+        setIsStatusModalOpen(true);
+    }
+
+    const handleOpenActivateModal = (user) => {
+        setSelectedStatusUser(user);
+        setStatusAction("activate");
+        setIsStatusModalOpen(true);
+    }
+
+    const handleCloseStatusModal = () => {
+        setSelectedStatusUser(null);
+        setStatusAction(null);
+        setIsStatusModalOpen(false);
+    }
+
     const handleSaveUser = async (formData, user) => {
         try {
             setIsSaving(true)
@@ -233,6 +268,37 @@ const Users = () => {
             throw error;
         } finally {
             setIsSaving(false)
+        }
+    }
+
+    const handleUpdateUserStatus = async () => {
+        if (!selectedStatusUser || !selectedStatusUser.id || !statusAction) {
+            return;
+        }
+
+        const isActivating = statusAction === "activate";
+
+        try {
+            setStatusUpdatingUserId(selectedStatusUser.id);
+            const updatedUser = await updateUser(selectedStatusUser.id, {
+                is_active: isActivating,
+            });
+
+            setUsers((prev) => prev.map((u) => (
+                u.id === selectedStatusUser.id ? updatedUser : u
+            )));
+            handleCloseStatusModal();
+        } catch (error) {
+            setDeleteErrorMessage(
+                getErrorMessage(
+                    error,
+                    isActivating ? "Failed to activate user." : "Failed to archive user."
+                )
+            );
+            handleCloseStatusModal();
+            handleOpenDeleteFailedModal();
+        } finally {
+            setStatusUpdatingUserId(null);
         }
     }
 
@@ -268,25 +334,43 @@ const Users = () => {
 
     return (
         <div className='flex flex-col'>
-            <div className='p-2 flex justify-end gap-2'>
-                <input
-                    type="text"
-                    placeholder="Search users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full md:w-80 px-3 py-2 border border-zinc-300 rounded-md text-sm"
-                />
-                <button
-                    onClick={generatePDF}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700"
-                >
-                    Export PDF
-                </button>
-                <AddButton
-                    variant='primary'
-                    onClick={handleOpenAddModal}>
-                    + Add User
-                </AddButton>
+            <div className='p-2 flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+                <div className="flex gap-2 border-b border-zinc-200">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.value}
+                            onClick={() => setActiveTab(tab.value)}
+                            className={`px-4 py-2 text-sm font-medium border-b-2 transition
+                                ${activeTab === tab.value
+                                    ? "border-zinc-900 text-zinc-900"
+                                    : "border-transparent text-zinc-500 hover:text-zinc-800"
+                                }`}
+                        >
+                            {tab.label} ({getCountByStatus(tab.value)})
+                        </button>
+                    ))}
+                </div>
+
+                <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end'>
+                    <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full md:w-80 px-3 py-2 border border-zinc-300 rounded-md text-sm"
+                    />
+                    <button
+                        onClick={generatePDF}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700"
+                    >
+                        Export PDF
+                    </button>
+                    <AddButton
+                        variant='primary'
+                        onClick={handleOpenAddModal}>
+                        + Add User
+                    </AddButton>
+                </div>
 
             </div>
             {loadErrorMessage && (
@@ -295,7 +379,9 @@ const Users = () => {
                 </p>
             )}
             {filteredUsers.length === 0 ? (
-                <p className="text-sm text-zinc-500">No users match your search.</p>
+                <p className="text-sm text-zinc-500">
+                    No {activeTab === "active" ? "active" : "archived"} users match your search.
+                </p>
             ) : (
                 <ReTable columns={userColumns} data={filteredUsers} />
             )}
@@ -385,9 +471,39 @@ const Users = () => {
                 </>
             </Modal>
             <Modal
+                isOpen={isStatusModalOpen}
+                onClose={handleCloseStatusModal}
+                title={statusAction === "activate" ? "Activate User" : "Archive User"}
+            >
+                <>
+                    <div>
+                        <p>
+                            Are you sure you want to {statusAction === "activate" ? "activate" : "archive"}{" "}
+                            {selectedStatusUser?.first_name} {selectedStatusUser?.last_name}?
+                        </p>
+                        <div className='flex p-4 gap-2 justify-end'>
+                            <button
+                                onClick={handleCloseStatusModal}
+                                disabled={statusUpdatingUserId === selectedStatusUser?.id}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60'>
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleUpdateUserStatus}
+                                disabled={statusUpdatingUserId === selectedStatusUser?.id}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm disabled:cursor-not-allowed disabled:opacity-60'>
+                                {statusUpdatingUserId === selectedStatusUser?.id
+                                    ? statusAction === "activate" ? "Activating..." : "Archiving..."
+                                    : statusAction === "activate" ? "Activate" : "Archive"}
+                            </button>
+                        </div>
+                    </div>
+                </>
+            </Modal>
+            <Modal
                 isOpen={openDeleteFailedModal}
                 onClose={handleCloseDeleteFailedModal}
-                title="Cannot delete user">
+                title="User action failed">
                 <>
                     <p>{deleteErrorMessage}</p>
                     <div className='flex justify-end mt-4'>

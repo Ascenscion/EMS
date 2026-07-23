@@ -20,6 +20,6 @@ export const assignmentRoutes = new Elysia({
         params: assignmentIdParam,
         body: updateAssignmentSchema
     })
-    .delete(":id", controller.deleteAssignment, {
+    .delete("/:id", controller.deleteAssignment, {
         params: assignmentIdParam
     })

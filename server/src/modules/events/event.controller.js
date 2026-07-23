@@ -43,6 +43,18 @@ function normalizeEventPayload(body) {
     };
 }
 
+async function getEventWithLocation(eventId) {
+    const event = await Event.findByPk(eventId, {
+        include: [
+            {
+                model: Location,
+            }
+        ]
+    });
+
+    return event ? event.toJSON() : null;
+}
+
 function validateEventPayload(body, set, { partial = false } = {}) {
     const payload = normalizeEventPayload(body);
     const requiredFields = partial
@@ -119,13 +131,7 @@ export async function createEvent({ body, set }) {
             location_id: location.id
         })
 
-        return Event.findByPk(event.id, {
-            include: [
-                {
-                    model: Location,
-                }
-            ]
-        });
+        return getEventWithLocation(event.id);
     } catch (error) {
         console.error("Error creating event:", error);
         console.error("Error message:", error.message);
@@ -148,11 +154,11 @@ export async function getAllEvents() {
         ]
     })
 
-    return events;
+    return events.map((event) => event.toJSON());
 }
 
 export async function getEvent({ params }) {
-    const event = await Event.findByPk(params.id)
+    const event = await getEventWithLocation(params.id)
     if (!event) {
         return { error: "Event not found" }
     }
@@ -168,7 +174,7 @@ export async function getActiveEvents() {
             { model: Location },
         ]
     })
-    return events;
+    return events.map((event) => event.toJSON());
 }
 
 export async function updateEvent({ params, body, set }) {
@@ -214,13 +220,7 @@ export async function updateEvent({ params, body, set }) {
             });
         }
 
-        return Event.findByPk(eventId, {
-            include: [
-                {
-                    model: Location
-                }
-            ]
-        });
+        return getEventWithLocation(eventId);
     } catch (error) {
         console.error("Error updating event:", error);
         set.status = 500;
@@ -250,4 +250,3 @@ export async function deleteEvent({ params, set }) {
         id: eventId
     };
 }
-

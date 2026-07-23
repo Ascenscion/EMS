@@ -13,6 +13,7 @@ const StaffEvents = () => {
     const [errorMessage, setErrorMessage] = useState("")
     const [events, setEvents] = useState([])
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
+    const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
     const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false)
     const [selectedEvent, setSelectedEvent] = useState(null)
     const [applications, setApplications] = useState([])
@@ -28,6 +29,16 @@ const StaffEvents = () => {
 
     const handleCloseApplyModal = () => {
         setIsApplyModalOpen(false)
+    }
+
+    const handleOpenInfoModal = (event) => {
+        setErrorMessage("")
+        setSelectedEvent(event)
+        setIsInfoModalOpen(true)
+    }
+
+    const handleCloseInfoModal = () => {
+        setIsInfoModalOpen(false)
     }
 
     const handleApply = async () => {
@@ -49,6 +60,7 @@ const StaffEvents = () => {
             const updatedApplications = await getApplicationbyUser(userId);
             setApplications(updatedApplications)
             handleCloseApplyModal()
+            handleCloseInfoModal()
             handleOpenConfirmationModal()
         } catch (error) {
             setErrorMessage(
@@ -134,7 +146,7 @@ const StaffEvents = () => {
 
                     </button>
                     <button
-                        //onClick={}
+                        onClick={() => handleOpenInfoModal(row)}
                         className='px-3 py-1 text-sm border border-zinc-300 rounded-md hover:bg-zinc-100'>
                         Info
                     </button>
@@ -164,6 +176,88 @@ const StaffEvents = () => {
                     data={events}>
                 </ReTable>
             )}
+            <Modal
+                isOpen={isInfoModalOpen}
+                onClose={handleCloseInfoModal}
+                title={selectedEvent?.name || "Event Details"}
+                maxWidth="max-w-2xl"
+            >
+                <div className="flex flex-col gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p className="text-zinc-500">Venue</p>
+                            <p className="font-medium text-zinc-900">
+                                {selectedEvent?.Location?.name || "No venue"}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-zinc-500">Status</p>
+                            <p className="font-medium text-zinc-900 capitalize">
+                                {selectedEvent?.status || "No status"}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-zinc-500">Start Date</p>
+                            <p className="font-medium text-zinc-900">
+                                {selectedEvent?.start_date || "No start date"}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-zinc-500">End Date</p>
+                            <p className="font-medium text-zinc-900">
+                                {selectedEvent?.end_date || "No end date"}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-zinc-500">Staff Needed</p>
+                            <p className="font-medium text-zinc-900">
+                                {selectedEvent?.max_users || "No staffing target"}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-zinc-500">Location</p>
+                            <p className="font-medium text-zinc-900">
+                                {[
+                                    selectedEvent?.Location?.address_line_1,
+                                    selectedEvent?.Location?.city,
+                                    selectedEvent?.Location?.state,
+                                    selectedEvent?.Location?.zip_code
+                                ].filter(Boolean).join(", ") || "No address"}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p className="text-sm text-zinc-500">Description</p>
+                        <p className="mt-1 text-sm leading-6 text-zinc-800">
+                            {selectedEvent?.description || "No description available."}
+                        </p>
+                    </div>
+
+                    <div className="flex justify-end gap-2 border-t border-zinc-200 pt-4">
+                        <AddButton
+                            type="button"
+                            variant="secondary"
+                            onClick={handleCloseInfoModal}
+                            disabled={isApplying}
+                        >
+                            Close
+                        </AddButton>
+                        <AddButton
+                            type="button"
+                            variant="primary"
+                            onClick={handleApply}
+                            disabled={isApplying || hasApplied(selectedEvent?.id)}
+                        >
+                            {hasApplied(selectedEvent?.id)
+                                ? "Applied"
+                                : isApplying
+                                    ? "Submitting..."
+                                    : "Apply"}
+                        </AddButton>
+                    </div>
+                </div>
+            </Modal>
             <Modal
                 isOpen={isApplyModalOpen}
                 onClose={handleCloseApplyModal}

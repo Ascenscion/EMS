@@ -39,7 +39,7 @@ export async function createApplication({ body, set }) {
             event_id: eventId
         })
 
-        return application;
+        return application.toJSON();
 
     } catch (error) {
         console.error("Error creating application:", error);
@@ -103,7 +103,7 @@ export async function updateApplicationStatus({ params, body, set }) {
 
         await application.save();
 
-        return Application.findByPk(id, {
+        const updatedApplication = await Application.findByPk(id, {
             include: [
                 {
                     model: User,
@@ -122,6 +122,8 @@ export async function updateApplicationStatus({ params, body, set }) {
                 }
             ]
         });
+
+        return updatedApplication.toJSON();
     } catch (error) {
         console.error("Error updating application: ", error);
         set.status = 500;
@@ -179,4 +181,3 @@ export async function deleteApplication({ params }) {
     })
     return deleted;
 }
-

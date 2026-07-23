@@ -56,6 +56,7 @@ export const createUserSchema = t.Object({
     role_id: t.Integer({
         minimum: 1,
     }),
+    is_active: t.Optional(t.Boolean()),
 });
 
 export const updateUserSchema = t.Partial(createUserSchema);
