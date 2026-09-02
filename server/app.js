@@ -54,7 +54,7 @@ async function startServer() {
 
         await db.sequelize.sync();
         // await db.sequelize.sync({ force: true });
-        await seedDatabase(db);
+        // await seedDatabase(db);
         console.log("tables created");
 
     } catch (error) {

@@ -9,11 +9,12 @@ const MyApplications = () => {
     const [errorMessage, setErrorMessage] = useState("");
 
     const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.id;
 
     useEffect(() => {
         const fetchMyApplications = async () => {
             try {
-                const data = await getApplicationbyUser(user.id);
+                const data = await getApplicationbyUser(userId);
                 setApplications(data);
             } catch (error) {
                 setErrorMessage(
@@ -26,8 +27,10 @@ const MyApplications = () => {
             }
         };
 
-        fetchMyApplications();
-    }, []);
+        if (userId) {
+            fetchMyApplications();
+        }
+    }, [userId]);
 
     const tabs = [
         { label: "Pending", value: "pending" },

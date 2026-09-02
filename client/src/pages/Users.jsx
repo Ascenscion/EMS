@@ -264,8 +264,6 @@ const Users = () => {
                 handleOpenUserCreatedModal();
             }
 
-        } catch (error) {
-            throw error;
         } finally {
             setIsSaving(false)
         }

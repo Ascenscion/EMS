@@ -10,7 +10,7 @@ export const getActiveEvents = async () => {
     return response.data;
 }
 
-export const getEventById = async () => {
+export const getEventById = async (id) => {
     const response = await api.get(`/events/${id}`);
     return response.data;
 }

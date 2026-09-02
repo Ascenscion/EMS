@@ -23,7 +23,7 @@ const Login = () => {
         try {
             setLoginError("")
             const data = await loginUser(formData)
-            localStorage.setItem("authToken", data.token)
+            localStorage.removeItem("authToken")
             localStorage.setItem("user", JSON.stringify(data.user))
             navigate("/")
         } catch (error) {

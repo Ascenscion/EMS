@@ -1,6 +1,12 @@
 import bcrypt from "bcrypt";
 import db from "../../models/index.js"
-import { getTokenExpiresIn, serializeAuthUser, signAuthToken } from "./auth.middleware.js";
+import {
+    clearAuthCookie,
+    getTokenExpiresIn,
+    serializeAuthUser,
+    setAuthCookie,
+    signAuthToken
+} from "./auth.middleware.js";
 
 const { User } = db;
 
@@ -33,10 +39,11 @@ export async function login({ body, set }) {
             return { message: "User account is inactive" }
         }
 
+        const token = signAuthToken(user);
+        setAuthCookie(set, token);
+
         return {
             message: "Login successful",
-            token: signAuthToken(user),
-            token_type: "Bearer",
             expires_in: getTokenExpiresIn(),
             user: serializeAuthUser(user)
         }
@@ -45,4 +52,13 @@ export async function login({ body, set }) {
         set.status = 500;
         return { message: "Could not log in" };
     }
+}
+
+export function me({ authUser }) {
+    return { user: authUser };
+}
+
+export function logout({ set }) {
+    clearAuthCookie(set);
+    return { message: "Logout successful" };
 }

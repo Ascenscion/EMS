@@ -1,5 +1,10 @@
 import jwt from "jsonwebtoken";
+import { getRedisClient } from "../../config/redis.js";
 import db from "../../models/index.js";
+import {
+    consumeLoginAttempt,
+    getLoginRateLimitKey
+} from "./loginRateLimiter.js";
 
 const { User } = db;
 
@@ -19,9 +24,7 @@ export const AUTHENTICATED_ROLES = [
 
 const TOKEN_EXPIRES_IN = "8h";
 const TOKEN_EXPIRES_IN_SECONDS = 8 * 60 * 60;
-const LOGIN_WINDOW_MS = 15 * 60 * 1000;
-const LOGIN_MAX_ATTEMPTS = 5;
-const loginAttempts = new Map();
+export const AUTH_COOKIE_NAME = "ems_session";
 
 function getJwtSecret() {
     if (!process.env.JWT_SECRET) {
@@ -61,6 +64,51 @@ export function serializeAuthUser(user) {
     };
 }
 
+function shouldUseSecureCookie() {
+    return process.env.AUTH_COOKIE_SECURE === "true" || process.env.NODE_ENV === "production";
+}
+
+function getCookieSameSite() {
+    const sameSite = process.env.AUTH_COOKIE_SAME_SITE?.toLowerCase();
+
+    if (["lax", "strict", "none"].includes(sameSite)) {
+        return sameSite;
+    }
+
+    return "lax";
+}
+
+function getAuthCookieOptions() {
+    return {
+        httpOnly: true,
+        secure: shouldUseSecureCookie(),
+        sameSite: getCookieSameSite(),
+        path: "/",
+        maxAge: TOKEN_EXPIRES_IN_SECONDS,
+    };
+}
+
+export function setAuthCookie(set, token) {
+    set.cookie = {
+        ...(set.cookie || {}),
+        [AUTH_COOKIE_NAME]: {
+            ...getAuthCookieOptions(),
+            value: token,
+        },
+    };
+}
+
+export function clearAuthCookie(set) {
+    set.cookie = {
+        ...(set.cookie || {}),
+        [AUTH_COOKIE_NAME]: {
+            ...getAuthCookieOptions(),
+            value: "",
+            maxAge: 0,
+        },
+    };
+}
+
 function authError(set, status, message) {
     set.status = status;
     return { message };
@@ -76,12 +124,63 @@ function getBearerToken(headers) {
     return authorization.slice("Bearer ".length).trim();
 }
 
+function getCookieToken(cookie) {
+    const token = cookie?.[AUTH_COOKIE_NAME]?.value;
+
+    return typeof token === "string" && token.trim() ? token.trim() : null;
+}
+
+function getAuthToken({ cookie, headers }) {
+    const cookieToken = getCookieToken(cookie);
+    if (cookieToken) {
+        return {
+            token: cookieToken,
+            source: "cookie",
+        };
+    }
+
+    const bearerToken = getBearerToken(headers);
+    if (bearerToken) {
+        return {
+            token: bearerToken,
+            source: "bearer",
+        };
+    }
+
+    return {
+        token: null,
+        source: null,
+    };
+}
+
+function isUnsafeMethod(method) {
+    return ["POST", "PUT", "PATCH", "DELETE"].includes(method);
+}
+
+function isTrustedOrigin(origin) {
+    if (!origin) {
+        return true;
+    }
+
+    const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+    return allowedOrigins.includes(origin);
+}
+
 export async function requireAuth(context) {
-    const { headers, set } = context;
-    const token = getBearerToken(headers);
+    const { cookie, headers, request, set } = context;
+    const { token, source } = getAuthToken({ cookie, headers });
 
     if (!token) {
         return authError(set, 401, "Authentication required");
+    }
+
+    const origin = headers.origin;
+    if (source === "cookie" && isUnsafeMethod(request.method) && !isTrustedOrigin(origin)) {
+        return authError(set, 403, "Request origin is not allowed");
     }
 
     try {
@@ -135,29 +234,27 @@ export function requireSelfOrRoles(getTargetUserId, allowedRoles) {
     };
 }
 
-export function rateLimitLogin({ body, headers, set }) {
+export async function rateLimitLogin({ body, headers, set }) {
     const forwardedFor = headers["x-forwarded-for"]?.split(",")[0]?.trim();
     const ip = forwardedFor || headers["x-real-ip"] || "unknown";
     const email = body.email?.trim().toLowerCase() || "unknown";
-    const key = `${ip}:${email}`;
-    const now = Date.now();
-    const record = loginAttempts.get(key);
+    const key = getLoginRateLimitKey({ ip, email });
 
-    if (!record || now > record.resetAt) {
-        loginAttempts.set(key, {
-            count: 1,
-            resetAt: now + LOGIN_WINDOW_MS,
-        });
-        return;
-    }
+    try {
+        const redisClient = await getRedisClient();
+        const result = await consumeLoginAttempt(redisClient, key);
 
-    if (record.count >= LOGIN_MAX_ATTEMPTS) {
-        set.status = 429;
+        if (!result.allowed) {
+            set.status = 429;
+            return {
+                message: "Too many login attempts. Please try again later.",
+            };
+        }
+    } catch (error) {
+        console.error("Login rate limiter unavailable:", error.message);
+        set.status = 503;
         return {
-            message: "Too many login attempts. Please try again later.",
+            message: "Authentication is temporarily unavailable",
         };
     }
-
-    record.count += 1;
-    loginAttempts.set(key, record);
 }
