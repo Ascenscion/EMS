@@ -28,7 +28,11 @@ const Header = () => {
 
                     <button
                         className="text-sm text-zinc-500 hover:text-zinc-800 transition"
-                        onClick={() => { localStorage.removeItem("user"); navigate("/login") }}>
+                        onClick={() => {
+                            localStorage.removeItem("authToken");
+                            localStorage.removeItem("user");
+                            navigate("/login");
+                        }}>
                         Logout
                     </button>
 

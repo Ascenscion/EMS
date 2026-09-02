@@ -5,22 +5,31 @@ import {
     checkInParamId
 } from "./checkIn.schema.js";
 import { Elysia } from "elysia";
+import { MANAGEMENT_ROLES, requireRoles } from "../auth/auth.middleware.js";
+
+const requireManagement = requireRoles(MANAGEMENT_ROLES);
 
 export const checkInRoutes = new Elysia({
     prefix: "/checkins"
 })
 
-    .get("/", controller.getAllCheckIns)
+    .get("/", controller.getAllCheckIns, {
+        beforeHandle: requireManagement
+    })
     .get("/:id", controller.getCheckIn, {
-        params: checkInParamId
+        params: checkInParamId,
+        beforeHandle: requireManagement
     })
     .post("/", controller.createCheckIn, {
-        body: createCheckInSchema
+        body: createCheckInSchema,
+        beforeHandle: requireManagement
     })
     .patch("/:id", controller.updateCheckIn, {
         params: checkInParamId,
-        body: updateCheckInSchema
+        body: updateCheckInSchema,
+        beforeHandle: requireManagement
     })
     .delete("/:id", controller.deleteCheckIn, {
-        params: checkInParamId
+        params: checkInParamId,
+        beforeHandle: requireManagement
     })

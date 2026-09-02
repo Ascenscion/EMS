@@ -2,9 +2,9 @@ import db from "../../models/index.js"
 
 const { Application, User, Event } = db;
 
-export async function createApplication({ body, set }) {
+export async function createApplication({ body, set, authUser }) {
     try {
-        const userId = Number(body.user_id);
+        const userId = Number(authUser?.id);
         const eventId = Number(body.event_id);
         const shiftId = body.shift_id ? Number(body.shift_id) : null;
 
@@ -85,10 +85,10 @@ export async function getApplications({ set }) {
     }
 }
 
-export async function updateApplicationStatus({ params, body, set }) {
+export async function updateApplicationStatus({ params, body, set, authUser }) {
     try {
         const id = Number(params.id);
-        const { status, reviewed_by_user_id } = body;
+        const { status } = body;
 
         const application = await Application.findByPk(id);
 
@@ -98,7 +98,7 @@ export async function updateApplicationStatus({ params, body, set }) {
         }
 
         application.status = status;
-        application.reviewed_by_user_id = reviewed_by_user_id;
+        application.reviewed_by_user_id = authUser.id;
         application.reviewed_at = new Date();
 
         await application.save();

@@ -10,7 +10,6 @@ const REQUIRED_EVENT_FIELDS = [
     "max_users",
     "description",
     "status",
-    "created_by",
     "location_name",
     "address_line_1",
     "city",
@@ -103,7 +102,7 @@ function validateEventPayload(body, set, { partial = false } = {}) {
     return { payload };
 }
 
-export async function createEvent({ body, set }) {
+export async function createEvent({ body, set, authUser }) {
     try {
         const validation = validateEventPayload(body, set);
         if (validation.message) {
@@ -127,7 +126,7 @@ export async function createEvent({ body, set }) {
             max_users: payload.max_users,
             description: payload.description,
             status: payload.status,
-            created_by: payload.created_by,
+            created_by: authUser.id,
             location_id: location.id
         })
 

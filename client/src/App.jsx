@@ -46,7 +46,11 @@ function App() {
             <Users />
           </RoleRoute>
         } />
-        <Route path="/applications" element={<Applications />} />
+        <Route path="/applications" element={
+          <RoleRoute allowedRoles={[1, 3]}>
+            <Applications />
+          </RoleRoute>
+        } />
         <Route path='/staffevents' element={
           <RoleRoute allowedRoles={[2, 3]}>
             <StaffEvents />

@@ -5,27 +5,40 @@ import {
     updateEventSchema,
     eventIdParam
 } from "./event.schema.js";
+import {
+    AUTHENTICATED_ROLES,
+    MANAGEMENT_ROLES,
+    requireRoles
+} from "../auth/auth.middleware.js";
 
 export const eventRoutes = new Elysia({
     prefix: "/events"
 })
-    .get("/", controller.getAllEvents)
+    .get("/", controller.getAllEvents, {
+        beforeHandle: requireRoles(MANAGEMENT_ROLES)
+    })
 
-    .get("/active", controller.getActiveEvents)
+    .get("/active", controller.getActiveEvents, {
+        beforeHandle: requireRoles(AUTHENTICATED_ROLES)
+    })
 
     .get("/:id", controller.getEvent, {
-        params: eventIdParam
+        params: eventIdParam,
+        beforeHandle: requireRoles(AUTHENTICATED_ROLES)
     })
 
     .post("/", controller.createEvent, {
-        body: createEventSchema
+        body: createEventSchema,
+        beforeHandle: requireRoles(MANAGEMENT_ROLES)
     })
 
     .patch("/:id", controller.updateEvent, {
         params: eventIdParam,
-        body: updateEventSchema
+        body: updateEventSchema,
+        beforeHandle: requireRoles(MANAGEMENT_ROLES)
     })
 
     .delete("/:id", controller.deleteEvent, {
-        params: eventIdParam
+        params: eventIdParam,
+        beforeHandle: requireRoles(MANAGEMENT_ROLES)
     })

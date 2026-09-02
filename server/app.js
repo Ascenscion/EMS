@@ -23,6 +23,10 @@ db.sequelize = sequelize;
 export const app = new Elysia({
     adapter: node()
 })
+    .use(cors({
+        allowedHeaders: ["Content-Type", "Authorization"],
+        methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"]
+    }))
     .use(userRoutes)
     .use(eventRoutes)
     .use(applicationRoutes)
@@ -33,7 +37,6 @@ export const app = new Elysia({
     .use(checkInRoutes)
     .use(departmentRoutes)
     .use(authRoutes)
-    .use(cors())
     .use(openapi())
     .get("/", () => {
         return { message: "Elysia server running" }
@@ -49,8 +52,8 @@ async function startServer() {
 
         console.log(`Server running on http://localhost:${process.env.PORT}`);
 
-        //await db.sequelize.sync();
-        await db.sequelize.sync({ force: true });
+        await db.sequelize.sync();
+        // await db.sequelize.sync({ force: true });
         await seedDatabase(db);
         console.log("tables created");
 
