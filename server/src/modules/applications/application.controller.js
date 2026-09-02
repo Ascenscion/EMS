@@ -1,23 +1,31 @@
-import { DATE, where } from "sequelize";
 import db from "../../models/index.js"
 
 const { Application, User, Event } = db;
 
-export async function createApplication({ body }) {
-    //const { applied_at, reviewed_by, reviewed_at, user_id, event_id } = body;
-    //console.log("STATUS", status);
+export async function createApplication({ body, set, authUser }) {
     try {
+        const userId = Number(authUser?.id);
+        const eventId = Number(body.event_id);
+        const shiftId = body.shift_id ? Number(body.shift_id) : null;
+
+        if (!userId || !eventId) {
+            set.status = 400;
+            return {
+                message: "User and event are required",
+            };
+        }
+
         const existingApplication = await Application.findOne({
             where: {
-                user_id: body.user_id,
-                event_id: body.event_id,
+                user_id: userId,
+                event_id: eventId,
             },
         });
 
         if (existingApplication) {
             set.status = 409;
             return {
-                error: "User has already applied to this event",
+                message: "User has already applied to this event",
             };
         }
 
@@ -25,32 +33,26 @@ export async function createApplication({ body }) {
             status: "pending",
             applied_at: new Date(),
             reviewed_at: null,
-            reviewed_by: null,
-            user_id: body.user_id,
-            shift_id: body.shift_id, //This will probably give me an error later
-            event_id: body.event_id
+            reviewed_by_user_id: null,
+            user_id: userId,
+            shift_id: shiftId,
+            event_id: eventId
         })
 
-        console.log(application);
-        return application;
+        return application.toJSON();
 
     } catch (error) {
         console.error("Error creating application:", error);
-        console.error("Name:", error.name);
-        console.error("Message:", error.message);
-        console.error("Errors:", error.errors?.map(e => e.message));
 
         set.status = 500;
         return {
-            error: "Could not create application",
-            name: error.name,
-            message: error.message,
+            message: "Could not create application",
             details: error.errors?.map(e => e.message),
         };
     }
 }
 
-export async function getApplications() {
+export async function getApplications({ set }) {
     try {
         const applications = await Application.findAll({
             include: [
@@ -75,37 +77,58 @@ export async function getApplications() {
         return applications;
     } catch (error) {
         console.error("Error fetching applications: ", error);
-        console.log("Backend error:", error.response?.data);
         set.status = 500;
         return {
-            error: "Could not fetch applications",
+            message: "Could not fetch applications",
             details: error.message,
         }
     }
 }
 
-export async function updateApplicationStatus({ params, body, set }) {
+export async function updateApplicationStatus({ params, body, set, authUser }) {
     try {
-        const { id } = params;
-        const { status, reviewed_by_user_id } = body;
+        const id = Number(params.id);
+        const { status } = body;
 
         const application = await Application.findByPk(id);
 
         if (!application) {
             set.status = 404;
-            return { error: "Application not found." }
+            return { message: "Application not found." }
         }
+
         application.status = status;
-        application.reviewed_by_user_id = reviewed_by_user_id;
+        application.reviewed_by_user_id = authUser.id;
         application.reviewed_at = new Date();
 
         await application.save();
-        return application;
+
+        const updatedApplication = await Application.findByPk(id, {
+            include: [
+                {
+                    model: User,
+                    as: "user",
+                    attributes: ["id", "first_name", "last_name", "email"]
+                },
+                {
+                    model: Event,
+                    as: "event",
+                    attributes: ["id", "name"]
+                },
+                {
+                    model: User,
+                    as: "reviewer",
+                    attributes: ["id", "first_name", "last_name"]
+                }
+            ]
+        });
+
+        return updatedApplication.toJSON();
     } catch (error) {
         console.error("Error updating application: ", error);
         set.status = 500;
         return {
-            error: "Could not update application",
+            message: "Could not update application",
             details: error.message,
         }
     }
@@ -158,6 +181,3 @@ export async function deleteApplication({ params }) {
     })
     return deleted;
 }
-
-
-

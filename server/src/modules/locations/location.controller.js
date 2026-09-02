@@ -1,4 +1,3 @@
-import { Elysia } from "elysia";
 import db from "../../models/index.js"
 
 const { Location } = db;
@@ -34,7 +33,7 @@ export async function updateLocation({ params, body }) {
     if (!location) {
         return { error: "Could not find location." }
     }
-    location.update(body);
+    await location.update(body);
     return location;
 }
 

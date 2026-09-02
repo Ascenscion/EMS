@@ -27,7 +27,7 @@ export async function updateDepartment({ params, body }) {
     if (!department) {
         return { error: "Department not found" }
     }
-    department.update(body);
+    await department.update(body);
     return department;
 }
 

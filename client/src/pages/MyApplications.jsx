@@ -6,24 +6,31 @@ const MyApplications = () => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("pending");
+    const [errorMessage, setErrorMessage] = useState("");
 
     const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.id;
 
     useEffect(() => {
         const fetchMyApplications = async () => {
             try {
-                const data = await getApplicationbyUser(user.id);
+                const data = await getApplicationbyUser(userId);
                 setApplications(data);
             } catch (error) {
-                console.log("Error fetching my applications:", error);
-                console.log("Backend response:", error.response?.data);
+                setErrorMessage(
+                    error.response?.data?.message ||
+                    error.response?.data?.error ||
+                    "Could not load your applications."
+                );
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchMyApplications();
-    }, []);
+        if (userId) {
+            fetchMyApplications();
+        }
+    }, [userId]);
 
     const tabs = [
         { label: "Pending", value: "pending" },
@@ -72,6 +79,12 @@ const MyApplications = () => {
     return (
         <div className="p-4">
             <h1 className="text-xl font-semibold mb-4">My Applications</h1>
+
+            {errorMessage && (
+                <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {errorMessage}
+                </p>
+            )}
 
             <div className="flex gap-2 border-b border-zinc-200 mb-4">
                 {tabs.map((tab) => (

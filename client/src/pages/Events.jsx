@@ -4,6 +4,7 @@ import ReTable from '../components/ReTable'
 import { createEvent, deleteEvent, getEvents, updateEvent } from '../services/eventService'
 import Modal from '../components/Modal'
 import EventModal from '../components/EventModal'
+import EventActionsDropdown from '../components/EventActionsDropdown'
 import { getErrorMessage } from '../utils/getErrorMessage'
 
 const Events = () => {
@@ -17,9 +18,12 @@ const Events = () => {
     const [isEventUpdatedSucccesModalOpen, setIsUpdatedSuccessModalOpen] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false)
+    const [completingEventId, setCompletingEventId] = useState(null)
     const [saveErrorMessage, setSaveErrorMessage] = useState("")
     const [isSaveErrorModalOpen, setIsSaveErrorModalOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState("");
+    const [activeTab, setActiveTab] = useState("active");
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -27,18 +31,14 @@ const Events = () => {
                 const data = await getEvents()
                 setEvents(data)
             } catch (error) {
-                console.log("Error fetching events", error);
+                setSaveErrorMessage(getErrorMessage(error, "Failed to load events."))
+                handleOpenSaveErrorModal()
             } finally {
                 setLoading(false)
             }
         }
         fetchEvents()
     }, [])
-
-    useEffect(() => {
-        console.log("Events state changed:", events)
-        console.log("First event from state:", events[0])
-    }, [events])
 
     const handleOpenCreateNewEventModal = () => {
         setSelectedEvent(null)
@@ -111,7 +111,7 @@ const Events = () => {
             zip_code: formData.zip_code?.trim(),
             max_users: Number(formData.max_users),
             created_by: user?.id || 1,
-            status: "active"
+            status: event?.status || "active"
         }
         try {
             setIsSaving(true)
@@ -129,7 +129,6 @@ const Events = () => {
             handleCloseCreateNewEventModal();
         } catch (error) {
             const message = getErrorMessage(error, "Failed to save/update event.")
-            console.error("Error saving event: ", message)
             setSaveErrorMessage(message)
             handleOpenSaveErrorModal()
         } finally {
@@ -150,12 +149,43 @@ const Events = () => {
             handleOpenDeleteConfirmationModal(true)
         } catch (error) {
             const message = getErrorMessage(error, "Failed to delete event.")
-            console.error("Error deleting event: ", message)
             handleCloseDeleteEventModal();
             setSaveErrorMessage(message)
             handleOpenSaveErrorModal()
         } finally {
             setIsDeleting(false)
+        }
+    }
+
+    const handleOpenCompleteEventModal = (event) => {
+        setSelectedEvent(event)
+        setIsCompleteModalOpen(true)
+    }
+
+    const handleCloseCompleteEventModal = () => {
+        setSelectedEvent(null)
+        setIsCompleteModalOpen(false)
+    }
+
+    const handleCompleteEvent = async (event) => {
+        if (!event || !event.id) {
+            return;
+        }
+
+        try {
+            setCompletingEventId(event.id)
+            const updatedEvent = await updateEvent(event.id, { status: "completed" });
+            setEvents((prev) =>
+                prev.map((e) => e.id === event.id ? updatedEvent : e)
+            )
+            handleCloseCompleteEventModal();
+        } catch (error) {
+            const message = getErrorMessage(error, "Failed to complete event.")
+            handleCloseCompleteEventModal();
+            setSaveErrorMessage(message)
+            handleOpenSaveErrorModal()
+        } finally {
+            setCompletingEventId(null)
         }
     }
 
@@ -170,25 +200,32 @@ const Events = () => {
         {
             header: "Actions",
             render: (row) => (
-
-                <div className='flex gap-2'>
-                    {/* {console.log("ROW", row)} */}
-                    <button
-                        onClick={() => handleOpenEditEventModal(row)}
-                        className='px-3 py-1 text-sm bg-zinc-900 text-white rounded-md hover:bg-zinc-800'>
-                        Edit
-                    </button>
-                    <button
-                        onClick={() => handleOpenDeleteEventModal(row)}
-                        className='px-3 py-1 text-sm border border-zinc-300 rounded-md hover:bg-zinc-100'>
-                        Delete
-                    </button>
-                </div>
+                <EventActionsDropdown
+                    event={row}
+                    isDeleting={isDeleting}
+                    isCompleting={completingEventId === row.id}
+                    onEdit={handleOpenEditEventModal}
+                    onComplete={handleOpenCompleteEventModal}
+                    onDelete={handleOpenDeleteEventModal}
+                />
             )
         }
     ]
 
-    const filteredEvents = events.filter((event) => {
+    const tabs = [
+        { label: "Active", value: "active" },
+        { label: "Completed", value: "completed" },
+    ];
+
+    const getCountByStatus = (status) => events.filter((event) => (
+        event.status?.toLowerCase() === status
+    )).length;
+
+    const eventsByStatus = events.filter((event) => (
+        event.status?.toLowerCase() === activeTab
+    ));
+
+    const filteredEvents = eventsByStatus.filter((event) => {
         const name = event.name?.toLowerCase() || "";
         const status = event.status?.toLowerCase() || "";
         const location = event.Location?.name?.toLowerCase() || "";
@@ -208,22 +245,42 @@ const Events = () => {
 
     return (
         <div className='flex flex-col'>
-            <div className='p-2 flex justify-end gap-2'>
-                <input
-                    type="text"
-                    placeholder="Search events..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full md:w-80 px-3 py-2 border border-zinc-300 rounded-md text-sm"
-                />
-                <AddButton
-                    variant='primary'
-                    onClick={handleOpenCreateNewEventModal}>
-                    + New Event
-                </AddButton>
+            <div className='p-2 flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+                <div className="flex gap-2 border-b border-zinc-200">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.value}
+                            onClick={() => setActiveTab(tab.value)}
+                            className={`px-4 py-2 text-sm font-medium border-b-2 transition
+                                ${activeTab === tab.value
+                                    ? "border-zinc-900 text-zinc-900"
+                                    : "border-transparent text-zinc-500 hover:text-zinc-800"
+                                }`}
+                        >
+                            {tab.label} ({getCountByStatus(tab.value)})
+                        </button>
+                    ))}
+                </div>
+
+                <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end'>
+                    <input
+                        type="text"
+                        placeholder="Search events..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full md:w-80 px-3 py-2 border border-zinc-300 rounded-md text-sm"
+                    />
+                    <AddButton
+                        variant='primary'
+                        onClick={handleOpenCreateNewEventModal}>
+                        + New Event
+                    </AddButton>
+                </div>
             </div>
             {filteredEvents.length === 0 ? (
-                <p className="text-sm text-zinc-500">No events match your search.</p>
+                <p className="text-sm text-zinc-500">
+                    No {activeTab} events match your search.
+                </p>
             ) : (
                 <ReTable
                     columns={eventColumns}
@@ -238,6 +295,31 @@ const Events = () => {
                 isSaving={isSaving}
             >
             </EventModal>
+            <Modal
+                isOpen={isCompleteModalOpen}
+                onClose={handleCloseCompleteEventModal}
+                title="Complete Event"
+                event={selectedEvent}>
+                <>
+                    <div>
+                        <p>Are you sure you want to mark {selectedEvent?.name} as completed?</p>
+                        <div className='flex p-4 gap-2 justify-end'>
+                            <button
+                                onClick={handleCloseCompleteEventModal}
+                                disabled={completingEventId === selectedEvent?.id}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60'>
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleCompleteEvent(selectedEvent)}
+                                disabled={completingEventId === selectedEvent?.id}
+                                className='px-4 py-2 rounded-lg text-sm font-medium transition duration-200 bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm disabled:cursor-not-allowed disabled:opacity-60'>
+                                {completingEventId === selectedEvent?.id ? "Completing..." : "Complete"}
+                            </button>
+                        </div>
+                    </div>
+                </>
+            </Modal>
             <Modal
                 isOpen={isDeleteModalOpen}
                 onClose={handleCloseDeleteEventModal}

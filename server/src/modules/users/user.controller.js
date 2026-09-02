@@ -11,6 +11,26 @@ function generateTempPassword() {
     return crypto.randomBytes(8).toString("hex");
 }
 
+async function getUserWithRelations(userId) {
+    const user = await User.findByPk(userId, {
+        attributes: { exclude: ["password_hash"] },
+        include: [
+            {
+                model: Role,
+                as: "role",
+                attributes: ["id", "name"],
+            },
+            {
+                model: Department,
+                as: "department",
+                attributes: ["id", "name"],
+            },
+        ],
+    });
+
+    return user ? user.toJSON() : null;
+}
+
 export async function createUser({ body, set }) {
     try {
         const { email } = body;
@@ -86,9 +106,6 @@ export async function createUser({ body, set }) {
         }
 
         const password = generateTempPassword();
-        //VIEW PASSWORD
-        console.log("PASSWORD", password);
-        //Hash pw
         const password_hash = await bcrypt.hash(password, 10);
 
         const payload = {
@@ -103,11 +120,7 @@ export async function createUser({ body, set }) {
         //create user
         const user = await User.create(payload);
 
-        //Remove pw from response
-        const userData = user.toJSON();
-        delete userData.password_hash;
-
-        return userData;
+        return getUserWithRelations(user.id);
     } catch (error) {
         console.error("Error creating user:", error);
         set.status = 500;
@@ -137,7 +150,6 @@ export async function getAllUsers() {
             ],
             order: [["id", "ASC"]],
         });
-        console.log("USERS:", users);
         return users;
     } catch (error) {
         console.error("Error fetching users:", error);
@@ -153,15 +165,10 @@ export async function getAllUsers() {
 
 export async function getUser({ params }) {
     try {
-        const user = await User.findByPk(params.id, {
-            attributes: { exclude: ["password_hash"] }
-        });
-        console.log("USER", user);
-        console.log("PARAMS", params.id);
+        const user = await getUserWithRelations(params.id);
         if (!user) {
             return { error: "User not found." }
         }
-        console.log("USER DOB: ", user);
         return user;
     } catch (error) {
         console.error("Error fetching user:", error);
@@ -321,23 +328,26 @@ export async function updateUser({ params, body, set }) {
 
         const payload = {
             ...body,
-            first_name: body.first_name?.trim(),
-            middle_name: body.middle_name?.trim() || null,
-            last_name: body.last_name?.trim(),
-            email: body.email?.trim().toLowerCase(),
-            address: body.address?.trim(),
-            emergency_contact: body.emergency_contact?.trim() || null,
-            emergency_phone: body.emergency_phone?.trim() || null,
+            first_name: body.first_name ? body.first_name.trim() : user.first_name,
+            middle_name: "middle_name" in body ? body.middle_name?.trim() || null : user.middle_name,
+            last_name: body.last_name ? body.last_name.trim() : user.last_name,
+            email: body.email ? body.email.trim().toLowerCase() : user.email,
+            address: body.address ? body.address.trim() : user.address,
+            emergency_contact: "emergency_contact" in body
+                ? body.emergency_contact?.trim() || null
+                : user.emergency_contact,
+            emergency_phone: "emergency_phone" in body
+                ? body.emergency_phone?.trim() || null
+                : user.emergency_phone,
             role_id: body.role_id ? Number(body.role_id) : user.role_id,
             department_id: body.department_id
                 ? Number(body.department_id)
                 : user.department_id,
+            is_active: typeof body.is_active === "boolean" ? body.is_active : user.is_active,
         };
 
         await user.update(payload);
-        const updatedUser = user.toJSON();
-        delete updatedUser.password_hash;
-        return updatedUser;
+        return getUserWithRelations(user.id);
     } catch (error) {
         console.error("Error updating user:", error);
 

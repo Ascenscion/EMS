@@ -1,8 +1,19 @@
 import React from "react"
 import { useNavigate } from "react-router-dom";
+import { logoutUser } from "../services/loginService";
 
 const Header = () => {
     const navigate = useNavigate()
+    const handleLogout = async () => {
+        try {
+            await logoutUser();
+        } finally {
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("user");
+            navigate("/login");
+        }
+    };
+
     return (
         <header className="w-full border-b border-zinc-200 bg-white">
 
@@ -28,7 +39,7 @@ const Header = () => {
 
                     <button
                         className="text-sm text-zinc-500 hover:text-zinc-800 transition"
-                        onClick={() => { localStorage.removeItem("user"); navigate("/login") }}>
+                        onClick={handleLogout}>
                         Logout
                     </button>
 

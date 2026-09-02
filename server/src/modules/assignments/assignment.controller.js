@@ -4,7 +4,6 @@ const { Assignment } = db;
 
 export async function createAssignment({ body }) {
     const { status } = body;
-    console.log("STATUS: ", status);
     const assignment = await Assignment.create({ status })
     return assignment;
 }

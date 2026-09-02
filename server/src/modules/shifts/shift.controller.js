@@ -1,20 +1,18 @@
-import { BelongsTo } from "sequelize";
 import db from "../../models/index.js"
-//import { Elysia } from "elysia"
 const { Shift } = db;
 
-export async function createShift({ body }) {
+export async function createShift({ body, set }) {
     const { name, start_time, end_time, required_staff, event_id } = body;
 
     if (!name || !start_time || !end_time || !required_staff || !event_id) {
-        set.status = 400; //Not sure that if this is this error code.
+        set.status = 400;
         return {
             success: false,
             message: "Missing fields"
         }
     }
 
-    if (new Date(body.end_time <= new Date(body.start_time))) {
+    if (new Date(end_time) <= new Date(start_time)) {
         set.status = 400;
         return {
             success: false,
@@ -24,8 +22,8 @@ export async function createShift({ body }) {
     const shift = await Shift.create({
         event_id,
         name,
-        start_time: new Date(body.start_time),
-        end_time: new Date(body.end_time),
+        start_time: new Date(start_time),
+        end_time: new Date(end_time),
         required_staff
     })
 

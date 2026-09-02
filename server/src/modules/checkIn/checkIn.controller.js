@@ -18,7 +18,7 @@ export async function getAllCheckIns() {
 }
 
 export async function getCheckIn({ params }) {
-    const checkIn = await CheckIn.findByPK(params.id);
+    const checkIn = await CheckIn.findByPk(params.id);
     if (!checkIn) {
         return { error: "No check in found " }
     }
@@ -26,11 +26,11 @@ export async function getCheckIn({ params }) {
 }
 
 export async function updateCheckIn({ params, body }) {
-    const checkIn = await CheckIn.findByPK(params.id);
+    const checkIn = await CheckIn.findByPk(params.id);
     if (!checkIn) {
         return { error: "No check in found" }
     }
-    checkIn.update(body);
+    await checkIn.update(body);
     return checkIn;
 }
 

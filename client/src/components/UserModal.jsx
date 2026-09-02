@@ -31,7 +31,6 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments, isSavi
     useEffect(() => {
 
         if (user) {
-            console.log("DOB ", user.dob);
             reset({
                 first_name: user.first_name || "",
                 middle_name: user.middle_name || "",
@@ -64,7 +63,6 @@ const UserModal = ({ isOpen, onClose, onSubmit, user, roles, departments, isSavi
 
     const submitHandler = async (data) => {
         try {
-            console.log("Modal form data: ", data);
             await onSubmit(data, user)
         } catch (error) {
             if (error.response?.data?.error == "Email already registered") {

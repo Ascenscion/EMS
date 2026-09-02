@@ -10,7 +10,6 @@ const REQUIRED_EVENT_FIELDS = [
     "max_users",
     "description",
     "status",
-    "created_by",
     "location_name",
     "address_line_1",
     "city",
@@ -41,6 +40,18 @@ function normalizeEventPayload(body) {
         max_users: body.max_users === undefined ? undefined : Number(body.max_users),
         created_by: body.created_by === undefined ? undefined : Number(body.created_by),
     };
+}
+
+async function getEventWithLocation(eventId) {
+    const event = await Event.findByPk(eventId, {
+        include: [
+            {
+                model: Location,
+            }
+        ]
+    });
+
+    return event ? event.toJSON() : null;
 }
 
 function validateEventPayload(body, set, { partial = false } = {}) {
@@ -91,7 +102,7 @@ function validateEventPayload(body, set, { partial = false } = {}) {
     return { payload };
 }
 
-export async function createEvent({ body, set }) {
+export async function createEvent({ body, set, authUser }) {
     try {
         const validation = validateEventPayload(body, set);
         if (validation.message) {
@@ -115,17 +126,11 @@ export async function createEvent({ body, set }) {
             max_users: payload.max_users,
             description: payload.description,
             status: payload.status,
-            created_by: payload.created_by,
+            created_by: authUser.id,
             location_id: location.id
         })
 
-        return Event.findByPk(event.id, {
-            include: [
-                {
-                    model: Location,
-                }
-            ]
-        });
+        return getEventWithLocation(event.id);
     } catch (error) {
         console.error("Error creating event:", error);
         console.error("Error message:", error.message);
@@ -148,11 +153,11 @@ export async function getAllEvents() {
         ]
     })
 
-    return events;
+    return events.map((event) => event.toJSON());
 }
 
 export async function getEvent({ params }) {
-    const event = await Event.findByPk(params.id)
+    const event = await getEventWithLocation(params.id)
     if (!event) {
         return { error: "Event not found" }
     }
@@ -168,7 +173,7 @@ export async function getActiveEvents() {
             { model: Location },
         ]
     })
-    return events;
+    return events.map((event) => event.toJSON());
 }
 
 export async function updateEvent({ params, body, set }) {
@@ -214,13 +219,7 @@ export async function updateEvent({ params, body, set }) {
             });
         }
 
-        return Event.findByPk(eventId, {
-            include: [
-                {
-                    model: Location
-                }
-            ]
-        });
+        return getEventWithLocation(eventId);
     } catch (error) {
         console.error("Error updating event:", error);
         set.status = 500;
@@ -250,4 +249,3 @@ export async function deleteEvent({ params, set }) {
         id: eventId
     };
 }
-

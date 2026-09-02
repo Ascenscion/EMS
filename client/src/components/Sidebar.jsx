@@ -1,7 +1,6 @@
 import React, { useState } from "react"
 import { NavLink } from "react-router-dom"
 import {
-    LayoutDashboard,
     Users,
     Calendar,
     ClipboardList,
@@ -38,13 +37,6 @@ const Sidebar = () => {
 
                 <nav className="flex flex-col gap-2 px-3">
 
-                    <NavLink
-                        to="/"
-                        className={navClass}
-                    >
-                        <LayoutDashboard size={18} />
-                        {!collapsed && "Dashboard"}
-                    </NavLink>
                     {canManageOperations && (
                         <>
                             <NavLink

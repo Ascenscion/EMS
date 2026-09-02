@@ -23,13 +23,10 @@ const Login = () => {
         try {
             setLoginError("")
             const data = await loginUser(formData)
-            console.log("Login response: ", data);
+            localStorage.removeItem("authToken")
             localStorage.setItem("user", JSON.stringify(data.user))
             navigate("/")
-            console.log("Login data:", formData)
         } catch (error) {
-            console.log("Login error", error);
-            console.log("Backend response:", error.response?.data);
             setLoginError(
                 error.response?.data?.message || "Login failed"
             )

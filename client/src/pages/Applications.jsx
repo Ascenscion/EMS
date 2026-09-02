@@ -1,12 +1,19 @@
 import React from 'react'
 import { useEffect } from 'react';
 import { useState } from 'react'
-import { getApplications, updateApplicationStatus } from '../../../client/src/services/applicationService.js';
+import { getApplications, updateApplicationStatus } from '../services/applicationService.js';
 import ReTable from '../components/ReTable.jsx';
 import Modal from '../components/Modal.jsx';
+import { getErrorMessage } from '../utils/getErrorMessage.js';
+import { getActiveEvents } from '../services/eventService.js';
+
 const Applications = () => {
     const [applications, setApplications] = useState([]);
+    const [activeEvents, setActiveEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [actionType, setActionType] = useState(null);
@@ -14,8 +21,10 @@ const Applications = () => {
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
     const [activeTab, setActiveTab] = useState("pending");
+    const [selectedEventId, setSelectedEventId] = useState("");
 
     const handleOpenConfirmModal = (application, status) => {
+        setErrorMessage("");
         setSelectedApplication(application);
         setActionType(status);
         setIsConfirmModalOpen(true);
@@ -30,19 +39,35 @@ const Applications = () => {
     const handleConfirmStatusUpdate = async () => {
         if (!selectedApplication || !actionType) return;
 
-        await handleUpdateStatus(selectedApplication.id, actionType);
+        const updatedApplication = await handleUpdateStatus(selectedApplication.id, actionType);
+        if (!updatedApplication) return;
 
         setIsConfirmModalOpen(false);
+        setSuccessMessage(
+            `Application has been ${actionType === "approved" ? "approved" : "rejected"}.`
+        )
         setIsSuccessModalOpen(true);
     };
 
 
     const getCountByStatus = (status) =>
-        applications.filter((app) => app.status === status).length;
+        applications.filter((app) => {
+            const matchesStatus = app.status === status;
+            const matchesEvent = selectedEventId
+                ? app.event_id === Number(selectedEventId)
+                : true;
 
-    const filteredApplications = applications.filter(
-        (app) => app.status === activeTab
-    );
+            return matchesStatus && matchesEvent;
+        }).length;
+
+    const filteredApplications = applications.filter((app) => {
+        const matchesStatus = app.status === activeTab;
+        const matchesEvent = selectedEventId
+            ? app.event_id === Number(selectedEventId)
+            : true;
+
+        return matchesStatus && matchesEvent;
+    });
 
     const tabs = [
         { label: "Pending", value: "pending" },
@@ -56,10 +81,16 @@ const Applications = () => {
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                const data = await getApplications();
-                setApplications(data);
+                setErrorMessage("");
+                const [applicationsData, activeEventsData] = await Promise.all([
+                    getApplications(),
+                    getActiveEvents(),
+                ]);
+
+                setApplications(applicationsData);
+                setActiveEvents(activeEventsData);
             } catch (error) {
-                console.log("Error fetching applications: ", error);
+                setErrorMessage(getErrorMessage(error, "Could not load applications."));
             } finally {
                 setLoading(false);
             }
@@ -68,7 +99,14 @@ const Applications = () => {
     }, []);
 
     const handleUpdateStatus = async (applicationId, status) => {
+        if (!user?.id) {
+            setErrorMessage("You must be signed in to review applications.");
+            return null;
+        }
+
         try {
+            setIsUpdating(true);
+            setErrorMessage("");
             const updatedApplication = await updateApplicationStatus(applicationId, {
                 status,
                 reviewed_by_user_id: user.id,
@@ -77,17 +115,16 @@ const Applications = () => {
             setApplications((prev) =>
                 prev.map((app) =>
                     app.id === applicationId
-                        ? {
-                            ...app,
-                            status: updatedApplication.status,
-                            reviewed_at: updatedApplication.reviewed_at,
-                            reviewed_by_user_id: updatedApplication.reviewed_by_user_id,
-                        }
+                        ? updatedApplication
                         : app
                 )
             )
+            return updatedApplication;
         } catch (error) {
-            console.log("Error updating application: ", error);
+            setErrorMessage(getErrorMessage(error, "Could not update application."));
+            return null;
+        } finally {
+            setIsUpdating(false);
         }
     }
 
@@ -115,15 +152,17 @@ const Applications = () => {
             render: (row) => (
                 <div className="flex gap-2">
                     <button
+                        disabled={isUpdating}
                         onClick={() => handleOpenConfirmModal(row, "approved")}
-                        className="px-3 py-1 text-sm bg-green-700 text-white rounded-md"
+                        className="px-3 py-1 text-sm bg-green-700 text-white rounded-md disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         Approve
                     </button>
 
                     <button
+                        disabled={isUpdating}
                         onClick={() => handleOpenConfirmModal(row, "rejected")}
-                        className="px-3 py-1 text-sm bg-red-700 text-white rounded-md"
+                        className="px-3 py-1 text-sm bg-red-700 text-white rounded-md disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         Reject
                     </button>
@@ -168,25 +207,53 @@ const Applications = () => {
         <div className="p-4">
             <h1 className="text-xl font-semibold mb-4">Applications</h1>
 
-            <div className="flex gap-2 border-b border-zinc-200 mb-4">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.value}
-                        onClick={() => setActiveTab(tab.value)}
-                        className={`px-4 py-2 text-sm font-medium border-b-2 transition
+            {errorMessage && (
+                <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {errorMessage}
+                </p>
+            )}
+
+            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="flex gap-2 border-b border-zinc-200">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.value}
+                            onClick={() => setActiveTab(tab.value)}
+                            className={`px-4 py-2 text-sm font-medium border-b-2 transition
             ${activeTab === tab.value
-                                ? "border-zinc-900 text-zinc-900"
-                                : "border-transparent text-zinc-500 hover:text-zinc-800"
-                            }`}
-                    >
-                        {tab.label} ({getCountByStatus(tab.value)})
-                    </button>
-                ))}
+                                    ? "border-zinc-900 text-zinc-900"
+                                    : "border-transparent text-zinc-500 hover:text-zinc-800"
+                                }`}
+                        >
+                            {tab.label} ({getCountByStatus(tab.value)})
+                        </button>
+                    ))}
+                </div>
+
+                <select
+                    value={selectedEventId}
+                    onChange={(event) => setSelectedEventId(event.target.value)}
+                    className="w-full md:w-72 px-3 py-2 border border-zinc-300 rounded-md text-sm bg-white text-zinc-700"
+                >
+                    <option value="">All active events</option>
+                    {activeEvents.map((event) => (
+                        <option key={event.id} value={event.id}>
+                            {event.name}
+                        </option>
+                    ))}
+                </select>
             </div>
-            <ReTable
-                columns={activeTab === "pending" ? pendingColumns : reviewedColumns}
-                data={filteredApplications}
-            />
+            {filteredApplications.length === 0 ? (
+                <p className="text-sm text-zinc-500">
+                    No {activeTab} applications
+                    {selectedEventId ? " for the selected event" : ""}.
+                </p>
+            ) : (
+                <ReTable
+                    columns={activeTab === "pending" ? pendingColumns : reviewedColumns}
+                    data={filteredApplications}
+                />
+            )}
             <Modal
                 isOpen={isConfirmModalOpen}
                 onClose={handleCloseConfirmModal}
@@ -202,16 +269,18 @@ const Applications = () => {
                     <div className="flex p-4 gap-2 justify-end">
                         <button
                             onClick={handleCloseConfirmModal}
-                            className="px-4 py-2 rounded-lg text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+                            disabled={isUpdating}
+                            className="px-4 py-2 rounded-lg text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             Cancel
                         </button>
 
                         <button
                             onClick={handleConfirmStatusUpdate}
-                            className="px-4 py-2 rounded-lg text-sm font-medium bg-zinc-900 text-white hover:bg-zinc-800"
+                            disabled={isUpdating}
+                            className="px-4 py-2 rounded-lg text-sm font-medium bg-zinc-900 text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            Confirm
+                            {isUpdating ? "Updating..." : "Confirm"}
                         </button>
                     </div>
                 </div>
@@ -222,13 +291,16 @@ const Applications = () => {
                 title="Success!"
             >
                 <div className="flex flex-col gap-4">
-                    <p>
-                        Application has been {actionType === "approved" ? "approved" : "rejected"}.
-                    </p>
+                    <p>{successMessage}</p>
 
                     <div className="flex justify-end">
                         <button
-                            onClick={() => setIsSuccessModalOpen(false)}
+                            onClick={() => {
+                                setIsSuccessModalOpen(false)
+                                setSelectedApplication(null)
+                                setActionType(null)
+                                setSuccessMessage("")
+                            }}
                             className="px-4 py-2 rounded-lg text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
                         >
                             Confirm

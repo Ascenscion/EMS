@@ -27,9 +27,9 @@ export const createEventSchema = t.Object({
         t.Literal("active"),
         t.Literal("completed")
     ]),
-    created_by: t.Integer({
+    created_by: t.Optional(t.Integer({
         minimum: 1
-    }),
+    })),
 
     location_name: t.String({
         minLength: 2,
